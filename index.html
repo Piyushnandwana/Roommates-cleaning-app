@@ -366,10 +366,9 @@ textarea:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(
 <script>
 const COLORS=['#0F766E','#D97706','#2563EB','#DB2777','#7C3AED','#059669','#DC2626','#0891B2'];
 const ACCENTS=[{name:'Teal',value:'#0F766E'},{name:'Terracotta',value:'#C2410C'},{name:'Sage',value:'#4D7C0F'},{name:'Ocean',value:'#0369A1'},{name:'Plum',value:'#86198F'},{name:'Charcoal',value:'#1C1917'}];
-// LocalStorage Key
+
 const STORAGE_KEY = 'roommate_cleaning_state';
 
-// Default initial state (used if no saved data is found)
 const defaultState = {
  houseName:'Maple House', houseTagline:'Fair turns, no group-chat nagging.', accent:'#0F766E', quietAfter:'22:00',
  currentUser:'r1', coverStyle:'swap', guestThreshold:3, selectedGuestHost:'r2', managerId:'r1', locked:false,
@@ -397,13 +396,11 @@ const defaultState = {
  instances:[], bounties:[], covers:[], guests:[], audit:null, timers:{}, timerStart:{}, setupDraft:null, setupSeen:false
 };
 
-// Load state from memory or use defaults
 function loadState() {
   const saved = localStorage.getItem(STORAGE_KEY);
   if (saved) {
     try {
       let parsed = JSON.parse(saved);
-      // Rehydrate dates
       if (parsed.instances) {
         parsed.instances.forEach(i => i.date = new Date(i.date));
       }
@@ -413,27 +410,18 @@ function loadState() {
       return parsed;
     } catch (e) {
       console.error('Failed to load saved state, reverting to default.');
-      return JSON.parse(JSON.stringify(defaultState)); // Deep copy
+      return JSON.parse(JSON.stringify(defaultState));
     }
   }
-  return JSON.parse(JSON.stringify(defaultState)); // Deep copy
+  return JSON.parse(JSON.stringify(defaultState));
 }
 
-// Save state to memory
 function saveState() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
 }
 
 let state = loadState();
 
-function $(id){return document.getElementById(id)}
-
-// Wrap renderAll to always trigger a save whenever the UI updates
-const originalRenderAll = renderAll;
-renderAll = function() {
-  saveState();
-  originalRenderAll();
-};
 function $(id){return document.getElementById(id)}
 function room(id){return state.roommates.find(r=>r.id===id)}
 function chore(id){return state.chores.find(c=>c.id===id)}
@@ -915,6 +903,12 @@ function applySmartSetup(){
  showPage('home');
  toast(`House built ✓ ${state.roommates.length} roommates, ${newChores.length} chores, fair rotation ready`);
 }
+
+const originalRenderAll = renderAll;
+renderAll = function() {
+  saveState();
+  originalRenderAll();
+};
 
 setInterval(()=>{if(activeCleaners().length){renderLive();renderHomeLiveOnly()}},30000);
 
