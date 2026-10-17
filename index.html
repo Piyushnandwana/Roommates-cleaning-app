@@ -401,6 +401,9 @@ function loadState() {
   if (saved) {
     try {
       let parsed = JSON.parse(saved);
+      // Merge with defaults to prevent crashes if old save data is missing keys
+      parsed = { ...JSON.parse(JSON.stringify(defaultState)), ...parsed }; 
+      
       if (parsed.instances) {
         parsed.instances.forEach(i => i.date = new Date(i.date));
       }
@@ -912,7 +915,12 @@ renderAll = function() {
 
 setInterval(()=>{if(activeCleaners().length){renderLive();renderHomeLiveOnly()}},30000);
 
-generate();
+if (state.instances.length === 0) {
+    generate();
+} else {
+    renderAll();
+}
+
 showPage('home');
 setTimeout(()=>{ if(!state.setupSeen) openSmartSetup(); },650);
 </script>
