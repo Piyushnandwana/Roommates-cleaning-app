@@ -1,0 +1,884 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+<meta name="color-scheme" content="light dark"/>
+<title>Roommate Cleaning Schedule</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#FFFBF2;--card:#FFFFFF;--ink:#1C1917;--muted:#78716C;--line:#F1E8D8;--teal:#0F766E;--tealDark:#115E59;--tealLight:#E6FFFA;--amber:#D97706;--amberBg:#FFFBEB;--red:#DC2626;--redBg:#FEF2F2;--green:#15803D;--greenBg:#F0FDF4;--shadow:0 8px 30px rgba(28,25,23,.06);--shadow2:0 2px 10px rgba(28,25,23,.05);--accent:#0F766E;--radius:22px}
+@media(prefers-color-scheme:dark){:root{--bg:#0C0A09;--card:#1C1917;--ink:#FAFAF9;--muted:#A8A29E;--line:#292524;--tealLight:#042F2E;--amberBg:#451A03;--redBg:#450A0A;--greenBg:#052E16;--shadow:0 8px 30px rgba(0,0,0,.35)}}
+*{box-sizing:border-box}body{margin:0;font-family:"Plus Jakarta Sans",system-ui,sans-serif;background:var(--bg);color:var(--ink);padding-bottom:110px;-webkit-font-smoothing:antialiased}
+button,input,select{font:inherit}
+.topbar{position:sticky;top:0;z-index:20;background:rgba(255,251,242,.92);backdrop-filter:blur(14px);border-bottom:1px solid var(--line);padding:12px 16px 10px}
+@media(prefers-color-scheme:dark){.topbar{background:rgba(12,10,9,.92)}}
+.topRow{display:flex;align-items:center;gap:12px;max-width:760px;margin:0 auto}
+.logo{width:42px;height:42px;border-radius:14px;background:var(--accent);display:grid;place-items:center;color:#fff;font-size:20px;box-shadow:0 6px 16px rgba(15,118,110,.28);flex-shrink:0}
+.title{font-weight:900;font-size:18px;line-height:1;letter-spacing:-.02em}.title small{display:block;font-size:11px;color:var(--muted);font-weight:700;margin-top:3px;letter-spacing:.02em}
+.acting{margin-left:auto;display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+.avatarBtn{border:1.5px solid var(--line);background:var(--card);border-radius:999px;padding:4px 10px 4px 4px;display:flex;align-items:center;gap:6px;cursor:pointer;font-weight:800;font-size:12px;box-shadow:var(--shadow2)}
+.avatarBtn.active{border-color:var(--accent);background:var(--tealLight)}
+.av{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;color:#fff;font-size:11px;font-weight:900;flex-shrink:0}
+.wrap{max-width:760px;margin:0 auto;padding:16px 14px 10px}
+.hero{background:linear-gradient(135deg,var(--accent) 0%,#134E4A 100%);border-radius:24px;padding:14px 16px;color:#fff;margin-bottom:12px;position:relative;overflow:hidden;box-shadow:0 12px 28px rgba(15,118,110,.25)}
+.hero:after{content:"";position:absolute;right:-30px;top:-30px;width:120px;height:120px;border-radius:50%;background:rgba(255,255,255,.12)}
+.hero h1{margin:0;font-size:20px;letter-spacing:-.03em;line-height:1}.hero p{margin:4px 0 0;opacity:.9;font-size:13px;line-height:1.4;max-width:520px}
+.heroRow{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;position:relative;z-index:1}
+.heroChip{background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.22);padding:6px 10px;border-radius:999px;font-size:12px;font-weight:800}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:16px;margin-bottom:12px;box-shadow:var(--shadow)}
+.card h2{margin:0 0 4px;font-size:16px;letter-spacing:-.02em}.card p.sub{margin:0 0 12px;color:var(--muted);font-size:13px;line-height:1.5}
+.pill{font-size:11px;font-weight:900;letter-spacing:.04em;text-transform:uppercase;padding:4px 8px;border-radius:999px;background:#FFF7ED;border:1px solid var(--line);white-space:nowrap}
+.pill.teal{background:var(--tealLight);color:var(--accent);border-color:transparent}.pill.amber{background:var(--amberBg);color:var(--amber);border-color:transparent}.pill.red{background:var(--redBg);color:var(--red);border-color:transparent}.pill.green{background:var(--greenBg);color:var(--green);border-color:transparent}
+.btn{border:none;cursor:pointer;border-radius:999px;padding:10px 14px;font-weight:800;font-size:13px;display:inline-flex;align-items:center;gap:6px;justify-content:center;transition:.15s}
+.btn:active{transform:scale(.98)}
+.btn.primary{background:var(--accent);color:#fff;box-shadow:0 6px 14px rgba(15,118,110,.22)}.btn.dark{background:var(--ink);color:var(--bg)}.btn.ghost{background:var(--bg);border:1px solid var(--line);color:var(--ink)}.btn.amber{background:var(--amber);color:#fff}.btn.red{background:var(--red);color:#fff}
+.btn:disabled{opacity:.45}
+.task{display:flex;gap:12px;padding:13px 0;border-top:1px solid var(--line)}.task:first-of-type{border-top:none;padding-top:4px}
+.taskIcon{width:44px;height:44px;border-radius:14px;display:grid;place-items:center;font-size:20px;flex-shrink:0}
+.taskMain{flex:1;min-width:0}.taskTitle{font-weight:800;font-size:15px;display:flex;flex-wrap:wrap;gap:6px;align-items:center}.meta{font-size:13px;color:var(--muted);margin-top:2px;line-height:1.4}.actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:9px}
+.notif{background:var(--ink);color:#FFFBF2;border-radius:20px;padding:16px;display:flex;gap:12px;align-items:flex-start;box-shadow:var(--shadow);margin-bottom:12px}
+.notifIcon{width:38px;height:38px;border-radius:50%;background:#FDE68A;color:#1C1917;display:grid;place-items:center;font-size:18px;flex-shrink:0}
+.liveDot{width:9px;height:9px;border-radius:50%;background:#22C55E;box-shadow:0 0 0 4px #DCFCE7;display:inline-block}
+.toggleRow{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 0;border-top:1px solid var(--line)}.toggleRow:first-of-type{border-top:none}
+.toggleRow b{font-size:14px}.toggleRow p{margin:2px 0 0;color:var(--muted);font-size:12px;line-height:1.4}
+.switch{width:52px;height:30px;border-radius:999px;border:none;cursor:pointer;position:relative;flex-shrink:0;background:#E7E5E4;padding:0}
+.switch::after{content:"";position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:50%;background:#fff;transition:.18s;box-shadow:0 1px 4px rgba(0,0,0,.22)}
+.switch.on{background:var(--accent)}.switch.on::after{left:25px}
+.switch.locked{opacity:.65;cursor:not-allowed}
+.bottomNav{position:fixed;left:0;right:0;bottom:0;z-index:30;background:var(--card);border-top:1px solid var(--line);padding:8px 8px calc(8px + env(safe-area-inset-bottom));display:flex;justify-content:space-around;max-width:760px;margin:0 auto;box-shadow:0 -8px 24px rgba(0,0,0,.05)}
+@media(min-width:761px){.bottomNav{border-left:1px solid var(--line);border-right:1px solid var(--line);border-radius:20px 20px 0 0}}
+.navBtn{border:none;background:transparent;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11px;font-weight:800;color:var(--muted);padding:7px 10px;border-radius:14px;min-width:68px}
+.navBtn.active{color:var(--accent);background:var(--tealLight)}
+.navBtn span:first-child{font-size:20px;line-height:1}
+.page{display:none}.page.active{display:block}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:102px;background:var(--ink);color:var(--bg);padding:11px 14px;border-radius:999px;font-weight:800;font-size:13px;z-index:50;max-width:92vw;text-align:center;box-shadow:0 12px 28px rgba(0,0,0,.18)}
+.hidden{display:none!important}
+.logItem{display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-top:1px solid var(--line);font-size:13px;align-items:center}.logItem:first-child{border-top:none}
+input,select{border:1px solid var(--line);background:var(--card);color:var(--ink);padding:11px 12px;border-radius:14px;width:100%;outline:none}
+input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--tealLight)}
+.field{margin-bottom:12px}.field label{display:block;font-size:11px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+.seg{display:flex;gap:6px;flex-wrap:wrap}.seg button{border:1px solid var(--line);background:var(--card);padding:8px 11px;border-radius:999px;cursor:pointer;font-weight:800;font-size:13px}.seg button.on{background:var(--ink);color:var(--bg)}
+.small{font-size:12px;color:var(--muted);line-height:1.5}
+.progress{height:9px;background:var(--line);border-radius:999px;overflow:hidden}.progress i{display:block;height:100%;background:var(--accent)}
+.avatarStack{display:flex}.avatarStack .av{margin-left:-6px;border:2px solid var(--card)}.avatarStack .av:first-child{margin-left:0}
+.swatch{width:38px;height:38px;border-radius:50%;border:3px solid transparent;cursor:pointer;flex-shrink:0}
+.swatch.on{border-color:var(--ink);box-shadow:0 0 0 2px var(--card),0 0 0 4px var(--ink)}
+.suggest{border:1px solid var(--line);background:var(--bg);border-radius:16px;padding:12px;margin-top:8px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}@media(max-width:560px){.grid2{grid-template-columns:1fr}}
+.modalOverlay{position:fixed;inset:0;background:rgba(28,25,23,.55);backdrop-filter:blur(6px);z-index:60;display:flex;align-items:flex-end;justify-content:center;padding:0}
+@media(min-width:640px){.modalOverlay{align-items:center;padding:18px}}
+.modalSheet{background:var(--card);width:100%;max-width:720px;max-height:92vh;overflow:auto;border-radius:24px 24px 0 0;padding:18px 16px 18px;box-shadow:0 20px 50px rgba(0,0,0,.25)}
+@media(min-width:640px){.modalSheet{border-radius:24px}}
+textarea{border:1px solid var(--line);background:var(--card);color:var(--ink);padding:12px;border-radius:14px;width:100%;min-height:118px;resize:vertical;line-height:1.5;font:inherit}
+textarea:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--tealLight)}
+.exampleChip{border:1px solid var(--line);background:var(--bg);border-radius:14px;padding:10px 12px;text-align:left;cursor:pointer;width:100%}
+.exampleChip b{font-size:13px;display:block}.exampleChip span{font-size:12px;color:var(--muted);line-height:1.4;display:block;margin-top:2px}
+.reviewRow{display:flex;gap:8px;align-items:center;padding:10px 0;border-top:1px solid var(--line)}
+.reviewRow:first-of-type{border-top:none}
+.miniInput{padding:8px 10px!important;border-radius:10px!important;font-size:13px}
+.miniSelect{padding:8px 10px!important;border-radius:10px!important;font-size:13px;width:auto}
+</style>
+</head>
+<body>
+<header class="topbar"><div class="topRow">
+<div class="logo">🧹</div><div class="title"><span id="houseNameTitle">Maple House</span><small id="houseStatus">4 roommates • Fair turns</small></div>
+<div class="acting" id="actingAs"></div>
+</div></header>
+
+<div class="wrap">
+<div class="hero">
+<h1 id="heroTitle">Maple House, sorted.</h1>
+<p id="heroSub">Fair turns, live status, and reminders that respect your evening. No group-chat nagging.</p>
+<div class="heroRow"><span class="heroChip" id="heroLiveChip">● 0 cleaning now</span><span class="heroChip" id="heroFairChip">Balanced this month</span><span class="heroChip">Trash 6–10 PM window</span></div>
+</div>
+
+<!-- HOME -->
+<section id="page-home" class="page active">
+<div class="card" id="smartSetupBanner" style="background:linear-gradient(135deg,#FFFBEB,#FFF7ED);border-color:#FDE68A">
+<div style="display:flex;gap:12px;align-items:flex-start">
+<div style="width:42px;height:42px;border-radius:12px;background:#F59E0B;display:grid;place-items:center;font-size:20px;flex-shrink:0">✨</div>
+<div style="flex:1;min-width:0">
+<h2 style="margin:0">New house? Set up in plain words</h2>
+<p class="sub" style="margin:4px 0 10px">Just describe who lives here and what needs doing. We'll build roommates, chores, points and the first fair rotation for you.</p>
+<button class="btn primary" style="background:#D97706" onclick="openSmartSetup()">Describe your house →</button>
+<button class="btn ghost" onclick="document.getElementById('smartSetupBanner').style.display='none';toast('You can reopen it anytime in More → House setup')">Not now</button>
+</div>
+</div>
+</div>
+<div id="turnNotif"></div>
+
+<div class="card" id="livePreviewCard">
+<div style="display:flex;justify-content:space-between;align-items:center;gap:10px">
+<h2 style="margin:0">Happening now</h2><span id="liveCountPill" class="pill green">0 cleaning</span>
+</div>
+<div id="livePreview" style="margin-top:10px"></div>
+<button class="btn ghost" style="width:100%;margin-top:10px" onclick="showPage('live')">Open Live view →</button>
+</div>
+
+<div class="card">
+<h2>Your turn</h2><p class="sub">Only your next jobs. Tap Start when you begin, Done when you finish. Everyone sees it live.</p>
+<div id="myTasks"></div>
+</div>
+
+<div class="card" style="background:#FFFBEB">
+<div style="display:flex;justify-content:space-between;align-items:center"><h2 style="margin:0">🗑️ Trash today</h2><span id="trashPill" class="pill">—</span></div>
+<p class="sub" id="trashSummary" style="margin-top:6px"></p>
+<div id="trashAction"></div>
+<p class="small" id="trashAlarmNote"></p>
+</div>
+
+<div class="card">
+<h2>This week at a glance</h2>
+<div style="display:flex;justify-content:space-between;font-size:13px;font-weight:800"><span id="weekLabel"></span><span id="weekPct"></span></div>
+<div class="progress" style="margin:8px 0 12px"><i id="weekBar"></i></div>
+<div id="balanceMini"></div>
+<button class="btn ghost" style="width:100%;margin-top:10px" onclick="showPage('schedule')">See full schedule →</button>
+</div>
+
+<div class="card">
+<h2>✨ Smart suggestions</h2><p class="sub">Little things that keep the house smooth.</p>
+<div id="suggestionsHome"></div>
+</div>
+</section>
+
+<!-- SCHEDULE -->
+<section id="page-schedule" class="page">
+<div class="card">
+<h2>Schedule</h2><p class="sub">All upcoming turns. One tap to start, one tap to finish. A turn locks to the first person who starts it.</p>
+<div id="taskList"></div>
+</div>
+
+<div class="card" style="border-color:#FDE68A;background:#FFFBEB">
+<div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><h2 style="margin:0">🍂 Seasonal deep cleans</h2><span class="pill amber" id="seasonalNextPill">Quarterly • 4×/year</span></div>
+<p class="sub" style="margin-top:6px">Big jobs that auto-schedule every quarter and flow through the same fair rotation. Heavier jobs carry more suck-points, so the load stays balanced.</p>
+<div id="seasonalList"></div>
+<p class="small" id="seasonalAlarmNote"></p>
+</div>
+
+<div class="card">
+<h2>Need a cover?</h2><p class="sub">If you are out, post it here. Someone else can take it and you owe them next week — or use cash if your house allows it.</p>
+<div style="display:flex;gap:8px;align-items:center;margin-bottom:10px"><span class="small" style="font-weight:800">Cover style:</span><div class="seg" id="coverStyleSeg"><button id="csSwap" onclick="setCoverStyle('swap')">Swap debt</button><button id="csCash" onclick="setCoverStyle('cash')">Cash</button></div></div>
+<div id="bountyBoard"></div>
+</div>
+
+<div class="card">
+<h2>Monthly log</h2><p class="sub">Who did what, week by week. No arguments.</p>
+<div id="monthLog"></div>
+<div style="margin-top:12px"><b style="font-size:13px">Cover ledger</b><div id="ledger"></div></div>
+</div>
+</section>
+
+<!-- LIVE -->
+<section id="page-live" class="page">
+<div class="card" style="text-align:center;padding:22px 16px">
+<div style="font-size:12px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">Cleaning right now</div>
+<div id="liveBigCount" style="font-size:48px;font-weight:900;line-height:1;margin:8px 0 2px">0</div>
+<div id="liveBigLabel" class="small">Nobody is cleaning right now</div>
+<div id="liveAvatars" style="display:flex;justify-content:center;margin-top:14px"></div>
+</div>
+
+<div class="card">
+<h2>Live activity</h2><p class="sub">When someone taps Start, they appear here instantly. Everyone can see who is doing what and how long it is taking.</p>
+<div id="liveList"></div>
+</div>
+
+<div class="card">
+<h2>Cleaning party</h2><p class="sub">Everyone cleans together for 30 minutes. No one watches while someone else scrubs.</p>
+<div id="partyBox" class="hidden" style="background:var(--bg);border:1px solid var(--line);border-radius:16px;padding:14px;text-align:center">
+<div style="font-weight:900">Party is on</div><div id="partyTimer" style="font-size:36px;font-weight:900;margin:6px 0">30:00</div>
+<button class="btn ghost" onclick="stopParty()">Stop party</button>
+</div>
+<button id="partyStartBtn" class="btn primary" style="width:100%" onclick="startParty()">▶ Start 30-min party</button>
+</div>
+
+<div class="card">
+<h2>Random audit</h2><p class="sub">One finished chore gets checked each week. Keeps it honest without photos.</p>
+<div id="auditBox"></div>
+<button class="btn dark" style="width:100%;margin-top:10px" onclick="runAudit()">Pick this week's audit</button>
+</div>
+</section>
+
+<!-- MORE -->
+<section id="page-more" class="page">
+
+<div class="card">
+<h2>🏡 House profile</h2><p class="sub">Make it yours. Manager can edit and lock these settings.</p>
+<div class="field"><label>House name</label><input id="houseNameInput" value="Maple House" placeholder="e.g. Maple House, Sunset Apt 4B"></div>
+<div class="field"><label>Tagline (shown on Home)</label><input id="houseTagInput" value="Fair turns, no group-chat nagging." placeholder="Short house motto"></div>
+<div class="field"><label>Accent colour</label><div id="accentRow" style="display:flex;gap:8px;flex-wrap:wrap"></div></div>
+<div class="grid2">
+<div class="field"><label>Guest limit / week</label><input type="number" id="guestLimitInput" min="1" max="7" value="3"></div>
+<div class="field"><label>Quiet hours after</label><input type="time" id="quietInput" value="22:00"></div>
+</div>
+<div style="display:flex;gap:8px;flex-wrap:wrap">
+<button class="btn primary" style="flex:1" onclick="saveHouseProfile()">Save house profile</button>
+<button class="btn ghost" onclick="previewAsGuest()">Preview</button>
+</div>
+<p class="small" id="houseProfileNote" style="margin-top:8px"></p>
+</div>
+
+<div class="card">
+<h2>🔔 Alarms & notifications</h2>
+<p class="sub">Turn off what you don't need. The <b>10:00 PM final trash alarm</b> stays ON if trash isn't marked done — only the manager can turn that one off.</p>
+<div id="alarmList"></div>
+<div style="background:#FFFBEB;border:1px solid #FDE68A;border-radius:14px;padding:12px;margin-top:12px">
+<b style="font-size:13px">⏰ 10 PM rule (manager-locked)</b>
+<p class="small" style="margin:6px 0 0">If trash is not marked <b>Done</b> by 10:00 PM, the final alarm fires for the person on duty. Members can silence other alarms, but this one needs the manager to switch off. It stops automatically once trash is marked done.</p>
+</div>
+<div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
+<button class="btn ghost" style="flex:1" onclick="setAllAlarms(false)">Turn optional alarms OFF</button>
+<button class="btn primary" style="flex:1" onclick="setAllAlarms(true)">Turn all ON</button>
+</div>
+<p class="small" id="alarmManagerNote" style="margin-top:8px"></p>
+</div>
+
+<div class="card">
+<h2>👥 Guest log</h2><p class="sub">Log a guest night anonymously. Past the limit, the host's load adjusts automatically — the app says it, not you.</p>
+<div class="field"><label>Whose guest?</label><div class="seg" id="guestHostSeg"></div></div>
+<button class="btn primary" style="width:100%" onclick="logGuest()">Log guest tonight • anonymous</button>
+<div id="guestStatus" style="margin-top:10px"></div>
+</div>
+
+<div class="card">
+<h2>Cover balance</h2><p class="sub">Chore cover credits and debts, netted between roommates.</p>
+<div id="coverBalance"></div>
+</div>
+
+<div class="card">
+<h2>House setup</h2><p class="sub">Manager sets the rules once, then locks them. Everyone else just does turns.</p>
+<div style="background:var(--tealLight);border:1px solid var(--line);border-radius:14px;padding:12px;margin-bottom:12px">
+<b style="font-size:14px">✨ Smart setup — plain words</b>
+<p class="small" style="margin:4px 0 8px">Start over or rebuild this house from a simple description. Names, chores, trash nights — we infer the rest.</p>
+<button class="btn primary" style="width:100%" onclick="openSmartSetup()">Describe your house</button>
+<p class="small" style="margin:6px 0 0">Example: “4 of us: Alex, Maya, Jon, Priya. Trash Tue & Fri nights…”</p>
+</div>
+<div id="managerBox"></div>
+<div style="margin-top:14px"><b style="font-size:13px">Roommates</b><div id="roommateList"></div></div>
+<div style="margin-top:14px"><b style="font-size:13px">Chores — tap to customise</b><div id="choreList"></div>
+<p class="small" style="margin-top:8px">Defaults: Bathroom 3 pts • Sweep & mop 3 pts • Kitchen 3 pts • Trash 1 pt. Frequencies: trash 2×/week, bathroom & mop at least 2×/month. Manager can edit points, frequency and cover price when unlocked.</p></div>
+<div style="margin-top:16px;padding-top:12px;border-top:1px dashed var(--line)"><b style="font-size:13px">🍂 Seasonal deep cleans — manager edit</b><p class="small" style="margin:4px 0 8px">Auto-scheduled 4×/year. Same fair rotation, heavier points. Edit difficulty or how often each one runs.</p><div id="seasonalSetupList"></div>
+<div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap"><button class="btn ghost" style="flex:1" onclick="addSeasonal()">+ Add deep clean</button><button class="btn ghost" style="flex:1" onclick="resetSeasonal()">Reset defaults</button></div>
+<p class="small" style="margin-top:8px">Members control only the reminder toggle in Alarms. List, frequency and points are manager-only when unlocked.</p></div>
+</div>
+
+<div class="card">
+<h2>Trash rules</h2><p class="sub">Your building's times. Alarms follow these. Final 10 PM alarm is separate and manager-locked above.</p>
+<div class="field"><label>Trash days</label><div class="seg" id="trashDaysSeg"></div></div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+<div class="field"><label>Out after</label><input type="time" id="tOut" value="18:00"></div>
+<div class="field"><label>Gentle</label><input type="time" id="tUrgent" value="19:00"></div>
+<div class="field"><label>Last call</label><input type="time" id="tLast" value="21:00"></div>
+<div class="field"><label>Truck</label><input type="time" id="tTruck" value="22:00"></div>
+</div>
+<button class="btn primary" style="width:100%" onclick="saveTrash()">Save trash rules</button>
+</div>
+
+<div class="card">
+<h2>💡 More you might need</h2><p class="sub">Quick add-ons houses usually ask for.</p>
+<div id="extrasList"></div>
+</div>
+
+</section>
+
+<p style="text-align:center;color:var(--muted);font-size:12px;margin:14px 0 4px">Simple turns. Less noise. Live when it matters.</p>
+</div>
+
+<nav class="bottomNav">
+<button class="navBtn active" data-page="home" onclick="showPage('home')"><span>🏠</span>Home</button>
+<button class="navBtn" data-page="schedule" onclick="showPage('schedule')"><span>📅</span>Schedule</button>
+<button class="navBtn" data-page="live" onclick="showPage('live')"><span>●</span>Live <span id="navLiveBadge" class="pill green hidden" style="font-size:10px;padding:2px 6px;margin-left:2px">0</span></button>
+<button class="navBtn" data-page="more" onclick="showPage('more')"><span>⚙️</span>More</button>
+</nav>
+
+<div id="setupModal" class="modalOverlay hidden" role="dialog" aria-modal="true" aria-label="Describe your house">
+<div class="modalSheet">
+<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px">
+<div>
+<div class="pill teal" style="margin-bottom:8px">✨ Smart setup</div>
+<h2 style="margin:0;font-size:20px;letter-spacing:-.02em">Describe your house</h2>
+<p class="small" style="margin:6px 0 0;max-width:560px">One box. Plain words. We’ll create roommates, chores with fair suck-points, trash nights and your first rotation.</p>
+</div>
+<button class="btn ghost" style="padding:8px 11px" onclick="closeSmartSetup()" aria-label="Close">✕</button>
+</div>
+
+<div id="setupStep1">
+<div class="field" style="margin-top:14px"><label for="setupText">Your house in your own words</label>
+<textarea id="setupText" placeholder="e.g. 4 of us: Alex, Maya, Jon, Priya. Trash goes out Tuesday and Friday nights, bathroom needs cleaning twice a month, kitchen gets messy fast so weekly, we have stairs and a living room."></textarea>
+<div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">
+<button class="btn ghost" id="micBtn" onclick="startDictation()">🎙️ Speak instead</button>
+<span class="small" id="micHint" style="align-self:center">Tap an example below or type your own.</span>
+</div>
+</div>
+
+<div style="margin:12px 0 8px"><b style="font-size:13px">Tap to try an example</b></div>
+<div style="display:grid;gap:8px">
+<button class="exampleChip" onclick="useExample(0)"><b>🏠 Classic 4-person flat</b><span>4 of us: Alex, Maya, Jon, Priya. Trash goes out Tuesday and Friday nights, bathroom twice a month, kitchen weekly because it gets messy fast, sweep and mop twice a month, we have stairs.</span></button>
+<button class="exampleChip" onclick="useExample(1)"><b>👩‍👩‍👧 Small & simple — 3 roommates</b><span>There are 3 of us — Sam, Riley and Noor. Trash on Monday night only, kitchen clean every week, bathroom once a week, living room tidy weekly. No stairs.</span></button>
+<button class="exampleChip" onclick="useExample(2)"><b>🏡 Bigger house — 5 people, busy kitchen</b><span>5 roommates: Ben, Chloe, Dev, Emma, Finn. Trash Wednesday and Saturday, kitchen gets messy fast so twice a week, bathrooms twice a month, sweep mop twice a month, stairs and hallway weekly, living room weekly.</span></button>
+</div>
+
+<button class="btn primary" style="width:100%;margin-top:14px;padding:14px;font-size:15px" onclick="parseSmartSetup()">Set up my house →</button>
+<p class="small" style="text-align:center;margin:8px 0 0">Nothing is final yet — next screen lets you tweak everything.</p>
+</div>
+
+<div id="setupStep2" class="hidden">
+<div style="background:var(--greenBg);border:1px solid var(--line);border-radius:14px;padding:12px;margin-top:14px">
+<b style="font-size:14px">✅ Here’s what we built for you</b>
+<p class="small" id="setupSummary" style="margin:4px 0 0"></p>
+</div>
+
+<div style="margin-top:14px">
+<b style="font-size:13px">👥 Roommates <span class="pill teal" id="reviewRoommateCount"></span></b>
+<div id="reviewRoommates" style="margin-top:6px"></div>
+<div style="display:flex;gap:8px;margin-top:8px"><input id="newRoommateName" class="miniInput" placeholder="Add a name…" style="flex:1"><button class="btn ghost" onclick="addReviewRoommate()">+ Add</button></div>
+</div>
+
+<div style="margin-top:16px">
+<b style="font-size:13px">🧹 Chores we created</b><p class="small" style="margin:2px 0 6px">Suck-points = how much it sucks. Heavier job = more points = fairer rotation.</p>
+<div id="reviewChores"></div>
+<div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap"><input id="newChoreName" class="miniInput" placeholder="Add a chore… e.g. Dishes" style="flex:1;min-width:160px"><button class="btn ghost" onclick="addReviewChore()">+ Add chore</button></div>
+</div>
+
+<div style="margin-top:16px">
+<b style="font-size:13px">🗑️ Trash nights</b>
+<div class="seg" id="reviewTrashSeg" style="margin-top:8px"></div>
+<p class="small" id="reviewTrashNote" style="margin-top:6px"></p>
+</div>
+
+<div style="margin-top:16px">
+<b style="font-size:13px">🔄 Your first fair rotation</b><p class="small" style="margin:2px 0 6px">Balanced by points, not just count. Heavier chores spread out.</p>
+<div id="reviewRotation"></div>
+</div>
+
+<div style="display:flex;gap:8px;margin-top:16px;flex-wrap:wrap">
+<button class="btn ghost" style="flex:1" onclick="backToDescribe()">← Edit description</button>
+<button class="btn primary" style="flex:2;padding:13px" onclick="applySmartSetup()">Looks good — Build my house ✓</button>
+</div>
+<button class="btn ghost" style="width:100%;margin-top:8px" onclick="closeSmartSetup()">Cancel, keep current house</button>
+</div>
+
+</div>
+</div>
+
+<div id="toast" class="toast hidden"></div>
+
+<script>
+const COLORS=['#0F766E','#D97706','#2563EB','#DB2777','#7C3AED','#059669','#DC2626','#0891B2'];
+const ACCENTS=[{name:'Teal',value:'#0F766E'},{name:'Terracotta',value:'#C2410C'},{name:'Sage',value:'#4D7C0F'},{name:'Ocean',value:'#0369A1'},{name:'Plum',value:'#86198F'},{name:'Charcoal',value:'#1C1917'}];
+let state={
+ houseName:'Maple House', houseTagline:'Fair turns, no group-chat nagging.', accent:'#0F766E', quietAfter:'22:00',
+ currentUser:'r1', coverStyle:'swap', guestThreshold:3, selectedGuestHost:'r2', managerId:'r1', locked:false,
+ supplies:[{id:'s1',name:'Trash bags & spray',amount:12,paidBy:'r1'},{id:'s2',name:'Dish soap',amount:18,paidBy:'r3'}],
+ trashDays:[1,4], trash:{out:'18:00',urgent:'19:00',last:'21:00',truck:'22:00'},
+ alarms:{ myTurn:true, started:true, trashGentle:true, trashUrgent:false, trashLast:false, trashFinal:true, covers:true, audits:false, seasonal:true },
+ roommates:[
+  {id:'r1',name:'Alex',color:COLORS[0],streak:6},
+  {id:'r2',name:'Jordan',color:COLORS[1],streak:3},
+  {id:'r3',name:'Sam',color:COLORS[3],streak:9},
+  {id:'r4',name:'Taylor',color:COLORS[2],streak:2},
+ ],
+ chores:[
+  {id:'c1',name:'Take out trash',icon:'🗑️',bg:'#FEF3C7',diff:1,count:2,period:'week',price:1},
+  {id:'c2',name:'Kitchen clean',icon:'🍳',bg:'#CCFBF1',diff:3,count:1,period:'week',price:2},
+  {id:'c3',name:'Bathroom scrub',icon:'🚿',bg:'#FCE7F3',diff:3,count:2,period:'month',price:3},
+  {id:'c4',name:'Sweep & mop',icon:'🧹',bg:'#DBEAFE',diff:3,count:2,period:'month',price:2},
+  {id:'c5',name:'Living room tidy',icon:'🛋️',bg:'#DCFCE7',diff:2,count:1,period:'week',price:1.5},
+  {id:'c6',name:'Stairs & hallway',icon:'🪜',bg:'#EDE9FE',diff:2,count:1,period:'week',price:1.5},
+  {id:'s1',name:'Oven deep clean',icon:'🔥',bg:'#FFEDD5',diff:5,count:1,period:'quarter',price:5,seasonal:true,season:'Fall'},
+  {id:'s2',name:'Fridge cleanout',icon:'🧊',bg:'#E0F2FE',diff:4,count:1,period:'quarter',price:4,seasonal:true,season:'Fall'},
+  {id:'s3',name:'Window washing',icon:'🪟',bg:'#FEF9C3',diff:4,count:1,period:'quarter',price:4,seasonal:true,season:'Fall'},
+  {id:'s4',name:'AC filter check',icon:'🌬️',bg:'#DCFCE7',diff:2,count:1,period:'quarter',price:2,seasonal:true,season:'Fall'},
+ ],
+ instances:[], bounties:[], covers:[], guests:[], audit:null, timers:{}, timerStart:{}, setupDraft:null, setupSeen:false
+};
+function $(id){return document.getElementById(id)}
+function room(id){return state.roommates.find(r=>r.id===id)}
+function chore(id){return state.chores.find(c=>c.id===id)}
+function fmtDate(d){return d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'})}
+function toast(msg){const t=$('toast');t.textContent=msg;t.classList.remove('hidden');clearTimeout(t._h);t._h=setTimeout(()=>t.classList.add('hidden'),3400)}
+function isManager(){return state.currentUser===state.managerId}
+function canEdit(){return isManager()&&!state.locked}
+function guardEdit(){if(!isManager()){toast('Only manager '+room(state.managerId).name+' can change rules');return false}if(state.locked){toast('Locked. Manager can unlock in More → House setup');return false}return true}
+function applyAccent(){document.documentElement.style.setProperty('--accent',state.accent);document.documentElement.style.setProperty('--teal',state.accent)}
+
+function generate(){
+ state.instances=[];let base=new Date('2026-10-02T12:00:00');let totals={};state.roommates.forEach(r=>totals[r.id]=0);let raw=[];
+ function addDays(off){let d=new Date(base);d.setDate(base.getDate()+off);return d}
+ state.chores.forEach(ch=>{
+  if(ch.id==='c1'){let found=0,off=0;while(found<4&&off<21){let d=addDays(off);if(state.trashDays.includes(d.getDay())){raw.push({choreId:ch.id,date:d});found++}off++}}
+  else if(ch.period==='week'){let offs=ch.count>=2?[0,3,7,10]:[1,8];offs.slice(0,ch.count*2).forEach(o=>raw.push({choreId:ch.id,date:addDays(o)}))}
+  else if(ch.period==='quarter'||ch.period==='half-year'|| (ch.seasonal&&ch.period==='month')){
+   const baseOff={'s1':5,'s2':12,'s3':19,'s4':9}[ch.id]||7;
+   const step = ch.period==='quarter'?90: ch.period==='half-year'?180:30;
+   const label = ch.period==='quarter' ? (q=>q===0?'Q4 2026 • Fall':'Q1 2027 • Winter') : (q=> ch.period==='half-year' ? (q===0?'Fall 2026':'Spring 2027') : 'Monthly deep clean');
+   const freqCount = ch.count||1;
+   for(let q=0;q<2;q++){
+     for(let k=0;k<freqCount;k++){
+       raw.push({choreId:ch.id,date:addDays(baseOff + q*step + k*7), seasonal:true, quarter: typeof label==='function'?label(q):label});
+     }
+   }
+  }
+  else{[2,12].slice(0,ch.count).forEach(o=>raw.push({choreId:ch.id,date:addDays(o)}))}
+ });
+ raw.sort((a,b)=>chore(b.choreId).diff-chore(a.choreId).diff);
+ raw.forEach((r,idx)=>{let assignee=[...state.roommates].sort((a,b)=>totals[a.id]-totals[b.id])[0];totals[assignee.id]+=chore(r.choreId).diff;state.instances.push({id:'i'+idx,choreId:r.choreId,date:r.date,assignee:assignee.id,status:idx<3?'done':'pending',doneBy:idx<3?assignee.id:null,claimedBy:null,mins:idx<3?(chore(r.choreId).diff*6+8):null,seasonal:!!r.seasonal,quarter:r.quarter||null})});
+ state.instances.sort((a,b)=>a.date-b.date);
+ state.bounties=[];let seed=state.instances.find(i=>i.status!=='done'&&chore(i.choreId).name.includes('Sweep'))||state.instances.find(i=>i.status!=='done');if(seed)state.bounties=[{id:'b1',instanceId:seed.id,from:seed.assignee,price:chore(seed.choreId).price,mode:'swap',status:'open'}];
+ if(!state.guests.length)state.guests=[{host:'r2',date:new Date()},{host:'r2',date:new Date()}];
+ if(!state.covers.length&&state.roommates.length>2)state.covers=[{from:state.roommates[0].id,to:state.roommates[2].id,points:3,chore:'Kitchen clean',price:2}];
+ applyAccent();renderAll();
+}
+function showPage(p){
+ document.querySelectorAll('.page').forEach(el=>el.classList.remove('active'));
+ document.querySelectorAll('.navBtn').forEach(b=>b.classList.toggle('active',b.dataset.page===p));
+ const el=$('page-'+p);if(el)el.classList.add('active');
+ window.scrollTo({top:0,behavior:'smooth'});
+ if(p==='live')renderLive();
+}
+function setUser(id){state.currentUser=id;renderAll();toast('Hi '+room(id).name+' • showing your view'+(isManager()?' • you are manager 👑':''))}
+function renderAll(){renderActing();renderHome();renderTasks();renderLive();renderBounty();renderMonth();renderMore();}
+
+function renderActing(){
+ $('actingAs').innerHTML=state.roommates.map(r=>`<button class="avatarBtn ${state.currentUser===r.id?'active':''}" onclick="setUser('${r.id}')"><span class="av" style="background:${r.color}">${r.name[0]}</span>${r.name}${r.id===state.managerId?' 👑':''}</button>`).join('');
+ $('houseStatus').textContent=(state.locked?'Locked • ':'')+'Mgr '+room(state.managerId).name+' • '+state.roommates.length+' roommates';
+ $('houseNameTitle').textContent=state.houseName;
+ const ht=$('heroTitle'); if(ht) ht.textContent=state.houseName+', sorted.';
+ const hs=$('heroSub'); if(hs) hs.textContent=state.houseTagline||'Fair turns, live status, and reminders that respect your evening.';
+ const hn=$('houseNameInput'); if(hn && document.activeElement!==hn) hn.value=state.houseName;
+ const htag=$('houseTagInput'); if(htag && document.activeElement!==htag) htag.value=state.houseTagline;
+ const gl=$('guestLimitInput'); if(gl) gl.value=state.guestThreshold;
+ const q=$('quietInput'); if(q) q.value=state.quietAfter;
+ const ar=$('accentRow'); if(ar) ar.innerHTML=ACCENTS.map(a=>`<button class="swatch ${state.accent===a.value?'on':''}" style="background:${a.value}" title="${a.name}" onclick="setAccent('${a.value}')"></button>`).join('');
+ const note=$('houseProfileNote'); if(note) note.textContent=isManager()?(state.locked?'Locked — unlock below to edit chore rules. House name & colour can still be saved by manager.':'You are manager — you can rename the house, recolour the app, and lock rules below.'):'Only '+room(state.managerId).name+' (manager) can rename the house or change colours. Switch to Alex in the demo to try it.';
+ const g=$('guestHostSeg');if(g)g.innerHTML=state.roommates.map(r=>`<button class="${state.selectedGuestHost===r.id?'on':''}" onclick="state.selectedGuestHost='${r.id}';renderMore()">${r.name}</button>`).join('');
+ const csS=$('csSwap'), csC=$('csCash'); if(csS&&csC){csS.className=state.coverStyle==='swap'?'on':''; csC.className=state.coverStyle==='cash'?'on':''; csS.classList.toggle('on',state.coverStyle==='swap'); csC.classList.toggle('on',state.coverStyle==='cash')}
+}
+function setAccent(v){if(!isManager()){toast('Only manager can change house colour');return} state.accent=v; applyAccent(); renderActing(); toast('House colour updated')}
+function saveHouseProfile(){
+ if(!isManager()){toast('Only manager '+room(state.managerId).name+' can edit house profile');return}
+ const name=($('houseNameInput').value||'').trim(); if(name) state.houseName=name;
+ state.houseTagline=($('houseTagInput').value||'').trim();
+ const gl=parseInt($('guestLimitInput').value||'3',10); if(gl>=1&&gl<=7) state.guestThreshold=gl;
+ state.quietAfter=$('quietInput').value||'22:00';
+ renderAll(); toast('House saved • '+state.houseName);
+}
+function previewAsGuest(){toast('Preview: Home shows "'+state.houseName+'" with your tagline and colour')}
+function setCoverStyle(s){state.coverStyle=s; renderActing(); toast(s==='cash'?'Cash covers ON • prices shown':'Swap covers ON • next-week balance')}
+
+function activeCleaners(){return state.instances.filter(i=>i.claimedBy&&i.status!=='done')}
+function distinctCleaners(){const map={}; activeCleaners().forEach(i=>{ map[i.claimedBy]=room(i.claimedBy) }); return Object.values(map)}
+function elapsedMins(id){if(!state.timerStart[id])return state.timers[id]||1;return Math.max(1,Math.round((Date.now()-state.timerStart[id])/60000))}
+
+function renderHome(){
+ const myNext=state.instances.find(i=>i.assignee===state.currentUser&&i.status!=='done'&&!i.claimedBy);
+ const notif=$('turnNotif');
+ if(state.alarms.myTurn&&myNext){
+  const ch=chore(myNext.choreId);
+  notif.innerHTML=`<div class="notif"><div class="notifIcon">🔔</div><div style="flex:1"><b>It's your turn, ${room(state.currentUser).name}</b><div style="font-size:13px;opacity:.9;margin-top:2px">${ch.icon} ${ch.name} • ${fmtDate(myNext.date)} • ${ch.diff} pts</div><div style="display:flex;gap:7px;margin-top:10px;flex-wrap:wrap"><button class="btn" style="background:#FFFBF2;color:#1C1917" onclick="startTask('${myNext.id}');showPage('live')">▶ Start now</button><button class="btn ghost" style="background:transparent;color:#FFFBF2;border-color:#44403C" onclick="imOut('${myNext.id}')">I'm out</button></div></div></div>`;
+ } else if(!state.alarms.myTurn){
+  notif.innerHTML=`<div class="card" style="display:flex;gap:10px;align-items:center;margin-bottom:12px"><span>🔕</span><div><b style="font-size:13px">Turn notifications are OFF</b><div class="small">Turn them on in More → Alarms if you want a ping for your turn.</div></div></div>`;
+ } else {
+  notif.innerHTML=`<div class="card" style="display:flex;gap:10px;align-items:center;margin-bottom:12px"><span>✅</span><div><b style="font-size:13px">You're all caught up</b><div class="small">No turn waiting for you right now.</div></div></div>`;
+ }
+ const act=activeCleaners(); const people=distinctCleaners();
+ $('liveCountPill').textContent=people.length===0?'Nobody cleaning':people.length+' cleaning now';
+ $('liveCountPill').className='pill '+(people.length?'green':'');
+ const heroChip=$('heroLiveChip'); if(heroChip) heroChip.textContent='● '+people.length+' cleaning now';
+ $('navLiveBadge').textContent=people.length; $('navLiveBadge').classList.toggle('hidden',people.length===0);
+ if(act.length===0){$('livePreview').innerHTML=`<p class="small" style="margin:0">No one has started a chore yet. When someone taps Start, you'll see them here live.</p>`} else {
+  $('livePreview').innerHTML=act.map(ins=>{const ch=chore(ins.choreId);const who=room(ins.claimedBy);return `<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-top:1px solid var(--line)"><span class="liveDot"></span><span class="av" style="background:${who.color}">${who.name[0]}</span><div style="flex:1"><b style="font-size:13px">${who.name}</b> <span class="small">• ${ch.name}</span><div class="small">${elapsedMins(ins.id)} min • in progress</div></div><span class="pill teal">Live</span></div>`}).join('');
+ }
+ const mine=state.instances.filter(i=>i.assignee===state.currentUser&&i.status!=='done').slice(0,3);
+ $('myTasks').innerHTML=mine.length?mine.map(ins=>taskRow(ins,true)).join(''):`<p class="small">Nothing assigned to you in the next turns. Nice.</p>`;
+ const trashIns=state.instances.find(i=>i.choreId==='c1'&&i.status!=='done')||state.instances.find(i=>i.choreId==='c1');
+ const doneTrash=trashIns&&trashIns.status==='done';
+ $('trashSummary').textContent=trashIns?`${fmtDate(trashIns.date)} • ${room(trashIns.assignee).name}'s turn • Out after ${state.trash.out}, truck ${state.trash.truck}`:'No trash turn scheduled';
+ $('trashPill').textContent=doneTrash?'Out ✓':'Not out yet'; $('trashPill').className='pill '+(doneTrash?'green':'amber');
+ $('trashAction').innerHTML=doneTrash?`<span class="pill green">Done • locked to one person • 10 PM alarm auto-off</span>`:trashIns?`<div style="display:flex;gap:7px;flex-wrap:wrap"><button class="btn primary" onclick="startTask('${trashIns.id}')">Start trash run</button><button class="btn ghost" onclick="toast(state.alarms.trashGentle?'Gentle reminder sent to ${room(trashIns.assignee).name}':'Trash gentle alarm is OFF')">Remind ${room(trashIns.assignee).name}</button></div>`:'';
+ const finalOn=state.alarms.trashFinal;
+ $('trashAlarmNote').textContent=doneTrash?'10:00 PM final alarm: OFF — trash already marked done.':(finalOn?`10:00 PM final alarm: ON (manager-locked) • fires if not done by 10 PM • Gentle ${state.alarms.trashGentle?'on':'off'}, 7 PM ${state.alarms.trashUrgent?'on':'off'}, 9 PM ${state.alarms.trashLast?'on':'off'}.`:`10:00 PM final alarm: OFF by manager • Gentle ${state.alarms.trashGentle?'on':'off'}, 7 PM ${state.alarms.trashUrgent?'on':'off'}, 9 PM ${state.alarms.trashLast?'on':'off'}.`);
+ const done=state.instances.filter(i=>i.status==='done').length;
+ $('weekLabel').textContent=done+' of '+state.instances.length+' done';
+ $('weekPct').textContent=Math.round(done/state.instances.length*100)+'%';
+ $('weekBar').style.width=(done/state.instances.length*100)+'%';
+ let totals={};state.roommates.forEach(r=>totals[r.id]=0);state.instances.forEach(ins=>totals[ins.assignee]=(totals[ins.assignee]||0)+chore(ins.choreId).diff);
+ const max=Math.max(...Object.values(totals),1);
+ $('balanceMini').innerHTML=state.roommates.map(r=>`<div style="display:flex;align-items:center;gap:8px;margin:7px 0;font-size:13px"><span class="av" style="background:${r.color};width:24px;height:24px;font-size:11px">${r.name[0]}</span><span style="width:52px;font-weight:800">${r.name}</span><div style="flex:1;height:8px;background:var(--line);border-radius:999px;overflow:hidden"><div style="height:100%;width:${totals[r.id]/max*100}%;background:${r.color}"></div></div><b>${totals[r.id]} pts</b></div>`).join('');
+ renderSuggestions();
+}
+function renderSuggestions(){
+ const el=$('suggestionsHome'); if(!el) return;
+ let counts={}; state.guests.forEach(x=>counts[x.host]=(counts[x.host]||0)+1);
+ const bathroomNext=state.instances.find(i=>i.choreId==='c3'&&i.status!=='done');
+ const suggestions=[];
+ if(counts['r2']>=2) suggestions.push({icon:'👥',title:(room('r2')?room('r2').name:'A roommate')+' is close to the guest limit',body:counts['r2']+' guest nights this week. One more hits the '+state.guestThreshold+'-night limit and adds +3 pts automatically.'});
+ if(bathroomNext) suggestions.push({icon:'🚿',title:'Bathroom due '+fmtDate(bathroomNext.date),body:room(bathroomNext.assignee).name+' is on it. Twice-a-month minimum is protected by the engine.'});
+ const act=activeCleaners(); if(act.length) suggestions.push({icon:'●',title:act.length+' chore'+(act.length>1?'s':'')+' live right now',body:act.map(i=>room(i.claimedBy).name+' • '+chore(i.choreId).name).join(' · ')});
+ const nextSeasonal=state.instances.find(i=>i.seasonal&&i.status!=='done'); if(nextSeasonal) suggestions.push({icon:'🍂',title:'Seasonal: '+chore(nextSeasonal.choreId).name+' • '+fmtDate(nextSeasonal.date),body:room(nextSeasonal.assignee).name+' is on it • '+chore(nextSeasonal.choreId).diff+' suck-points • Quarterly rotation, same fairness as weekly chores.'+(state.alarms.seasonal?' Reminder ON.':' Reminder OFF in More → Alarms.')});
+ if(!suggestions.length) suggestions.push({icon:'✨',title:'House is balanced',body:'No guest or bathroom flags right now. Nice and quiet.'});
+ el.innerHTML=suggestions.map(s=>`<div class="suggest"><b style="font-size:13px">${s.icon} ${s.title}</b><p class="small" style="margin:4px 0 0">${s.body}</p></div>`).join('');
+}
+
+function taskRow(ins,compact){
+ const ch=chore(ins.choreId);const as=room(ins.assignee);const isMine=ins.assignee===state.currentUser;
+ const openB=state.bounties.find(b=>b.instanceId===ins.id&&b.status==='open');
+ let pill=ins.status==='done'?'<span class="pill green">Done</span>':ins.claimedBy?'<span class="pill teal">In progress</span>':'<span class="pill">Pending</span>';
+ if(ch.seasonal) pill+=' <span class="pill amber">🍂 Seasonal</span>';
+ if(openB)pill+=' <span class="pill amber">Cover?</span>';
+ let actions='';
+ if(ins.status!=='done'){
+  if(!ins.claimedBy)actions=`<button class="btn primary" onclick="startTask('${ins.id}')">▶ Start</button><button class="btn ghost" onclick="imOut('${ins.id}')">I'm out</button>`;
+  else if(ins.claimedBy===state.currentUser)actions=`<button class="btn primary" onclick="finishTask('${ins.id}')">✓ Done</button><span class="small">Live now • ${elapsedMins(ins.id)} min</span>`;
+  else actions=`<span class="pill teal"><span class="liveDot" style="width:7px;height:7px"></span> ${room(ins.claimedBy).name} is doing it</span>`;
+ } else {actions=`<span class="small">Done by ${room(ins.doneBy)?.name||as.name} • ${ins.mins||'—'} min • locked</span>`}
+ return `<div class="task"><div class="taskIcon" style="background:${ch.bg}">${ch.icon}</div><div class="taskMain"><div class="taskTitle">${ch.name} ${pill}</div><div class="meta">${fmtDate(ins.date)} • ${as.name}'s turn ${isMine?'• <b style="color:var(--accent)">You</b>':''} • ${ch.diff} pts${ch.seasonal?' • '+(ins.quarter||'Quarterly'):''}</div><div class="actions">${actions}</div></div><span class="av" style="background:${as.color}">${as.name[0]}</span></div>`;
+}
+function renderTasks(){
+ const regular = state.instances.filter(i=>!i.seasonal);
+ const seasonal = state.instances.filter(i=>i.seasonal);
+ $('taskList').innerHTML=regular.slice(0,14).map(ins=>taskRow(ins)).join('')||'<p class="small">No turns yet.</p>';
+ const sl=$('seasonalList');
+ if(sl){
+   if(!seasonal.length){ sl.innerHTML='<p class="small">No seasonal cleans scheduled. Manager can add them in House Setup.</p>'; }
+   else {
+     let byQ={}; seasonal.forEach(ins=>{ const k=ins.quarter||'Quarterly'; (byQ[k]=byQ[k]||[]).push(ins) });
+     sl.innerHTML=Object.entries(byQ).map(([q,list])=>`<div style="margin-top:10px"><b style="font-size:13px">${q}</b>${list.map(ins=>taskRow(ins)).join('')}</div>`).join('');
+   }
+   const next=seasonal.find(i=>i.status!=='done');
+   const pillEl=$('seasonalNextPill'); if(pillEl&&next) pillEl.textContent='Next: '+chore(next.choreId).name+' • '+fmtDate(next.date);
+   const note=$('seasonalAlarmNote'); if(note) note.textContent = state.alarms.seasonal ? 'Reminder: ON — heads-up 3 days before each deep clean. Turn off in More → Alarms.' : 'Reminder: OFF — deep cleans still show here, but no ping. Turn on in More → Alarms.';
+ }
+}
+
+function renderLive(){
+ const act=activeCleaners(); const people=distinctCleaners();
+ $('liveBigCount').textContent=people.length;
+ $('liveBigLabel').textContent=people.length===0?'Nobody is cleaning right now':people.length===1?'1 person is cleaning now':people.length+' people are cleaning now';
+ $('liveAvatars').innerHTML=people.length?`<div class="avatarStack">${people.map(w=>`<span class="av" style="background:${w.color};width:38px;height:38px;font-size:14px" title="${w.name}">${w.name[0]}</span>`).join('')}</div>`:`<span class="small">Tap Start on any turn and you'll appear here.</span>`;
+ if(act.length===0){$('liveList').innerHTML=`<div style="text-align:center;padding:16px 8px"><div style="font-size:28px">🧺</div><b>No live chores</b><p class="small">When a roommate starts, everyone sees it here: who, what, and how long.</p><button class="btn primary" onclick="showPage('schedule')">Go to Schedule</button></div>`}
+ else {$('liveList').innerHTML=act.map(ins=>{const ch=chore(ins.choreId);const who=room(ins.claimedBy);return `<div class="task"><div class="taskIcon" style="background:${ch.bg}">${ch.icon}</div><div class="taskMain"><div class="taskTitle"><span class="liveDot"></span> ${who.name} <span class="pill teal">In progress</span></div><div class="meta">${ch.name} • started ${elapsedMins(ins.id)} min ago • ${fmtDate(ins.date)}</div><div class="actions">${ins.claimedBy===state.currentUser?`<button class="btn primary" onclick="finishTask('${ins.id}')">✓ I'm done</button>`:`<span class="small">Watching live • no need to ask</span>`}</div></div><span class="av" style="background:${who.color};width:36px;height:36px">${who.name[0]}</span></div>`}).join('')}
+ renderHomeLiveOnly();
+}
+function renderHomeLiveOnly(){
+ const act=activeCleaners(); const people=distinctCleaners();
+ const pill=$('liveCountPill'); if(pill){pill.textContent=people.length===0?'Nobody cleaning':people.length+' cleaning now'; pill.className='pill '+(people.length?'green':'')}
+ const hc=$('heroLiveChip'); if(hc) hc.textContent='● '+people.length+' cleaning now';
+ const badge=$('navLiveBadge'); if(badge){badge.textContent=people.length; badge.classList.toggle('hidden',people.length===0)}
+ const lp=$('livePreview'); if(lp){lp.innerHTML=act.length===0?`<p class="small" style="margin:0">No one has started a chore yet. When someone taps Start, you'll see them here live.</p>`:act.map(ins=>{const ch=chore(ins.choreId);const who=room(ins.claimedBy);return `<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-top:1px solid var(--line)"><span class="liveDot"></span><span class="av" style="background:${who.color}">${who.name[0]}</span><div style="flex:1"><b style="font-size:13px">${who.name}</b> <span class="small">• ${ch.name}</span><div class="small">${elapsedMins(ins.id)} min • in progress</div></div><span class="pill teal">Live</span></div>`}).join('')}
+}
+function startTask(id){
+ const ins=state.instances.find(i=>i.id===id);
+ if(ins.claimedBy&&ins.claimedBy!==state.currentUser){toast('Already started by '+room(ins.claimedBy).name+' • locked to one person');return}
+ ins.claimedBy=state.currentUser;ins.assignee=state.currentUser;state.timerStart[id]=Date.now();state.timers[id]=1;
+ renderAll();
+ toast(state.alarms.started?room(state.currentUser).name+' started '+chore(ins.choreId).name+' • Live for everyone':'Started • Live view updated');
+ showPage('live');
+}
+function finishTask(id){
+ const ins=state.instances.find(i=>i.id===id);ins.status='done';ins.doneBy=state.currentUser;ins.mins=elapsedMins(id);ins.claimedBy=null;delete state.timerStart[id];delete state.timers[id];
+ renderAll();toast('Done ✓ Locked to you. '+(ins.choreId==='c1'?'10 PM alarm auto-off.':'Live cleared.'));
+}
+function imOut(id){
+ const ins=state.instances.find(i=>i.id===id);const ch=chore(ins.choreId);
+ state.bounties.unshift({id:'b'+Date.now(),instanceId:id,from:state.currentUser,price:ch.price,mode:state.coverStyle,status:'open'});
+ renderAll();toast(state.coverStyle==='cash'?'Posted for $'+ch.price+' cover':'Posted for swap • you will owe next week');
+}
+function renderBounty(){
+ const el=$('bountyBoard');if(!el)return;
+ if(!state.bounties.length){el.innerHTML='<p class="small">No open covers.</p>';return}
+ el.innerHTML=state.bounties.map(b=>{const ins=state.instances.find(i=>i.id===b.instanceId);if(!ins)return'';const ch=chore(ins.choreId);return `<div class="task"><div class="taskIcon" style="background:${ch.bg}">${ch.icon}</div><div class="taskMain"><div class="taskTitle">${ch.name} <span class="pill amber">${room(b.from).name} is out</span></div><div class="meta">${fmtDate(ins.date)} • ${ch.diff} pts • ${b.mode==='cash'?'$'+b.price+' cash':'Swap • they owe you next week'}</div><div class="actions">${b.status==='open'?(b.from===state.currentUser?'<span class="pill">Waiting…</span>':`<button class="btn primary" onclick="claimBounty('${b.id}')">Take it • ${room(state.currentUser).name}</button>`):`<button class="btn ghost" onclick="confirmBounty('${b.id}')">Confirm done</button>`}</div></div></div>`}).join('');
+}
+function claimBounty(bid){const b=state.bounties.find(x=>x.id===bid);if(b.from===state.currentUser){toast('You cannot take your own cover');return}const ins=state.instances.find(i=>i.id===b.instanceId);ins.assignee=state.currentUser;ins.claimedBy=state.currentUser;state.timerStart[ins.id]=Date.now();b.status='claimed';b.claimer=state.currentUser;if(b.mode==='swap')state.covers.unshift({from:b.from,to:state.currentUser,points:chore(ins.choreId).diff,chore:chore(ins.choreId).name,price:chore(ins.choreId).price});renderAll();toast('You took it • Live now');showPage('live')}
+function confirmBounty(bid){const b=state.bounties.find(x=>x.id===bid);b.status='confirmed';const ins=state.instances.find(i=>i.id===b.instanceId);ins.status='done';ins.doneBy=b.claimer;ins.mins=18;ins.claimedBy=null;renderAll();toast('Confirmed ✓ Cover settled')}
+
+function renderMonth(){
+ const el=$('monthLog');if(!el)return;
+ const regular = state.instances.filter(i=>!i.seasonal);
+ const seasonal = state.instances.filter(i=>i.seasonal);
+ let weeks={};regular.forEach(ins=>{let k=ins.date<new Date('2026-10-09')?'Week of Oct 2':'Week of Oct 9';(weeks[k]=weeks[k]||[]).push(ins)});
+ let html=Object.entries(weeks).map(([k,list])=>`<div style="margin-top:10px"><b style="font-size:13px">${k}</b>${list.slice(0,6).map(ins=>{const ch=chore(ins.choreId);const live=ins.claimedBy&&ins.status!=='done';return `<div class="logItem"><span>${ch.icon} ${ch.name}</span><span>${live?room(ins.claimedBy).name+' • live':room(ins.assignee).name+' • '+ins.status}</span></div>`}).join('')}</div>`).join('');
+ if(seasonal.length){
+   let byQ={}; seasonal.forEach(ins=>{ const k=ins.quarter||'Seasonal'; (byQ[k]=byQ[k]||[]).push(ins) });
+   html+=`<div style="margin-top:14px;padding-top:10px;border-top:1px dashed var(--line)"><b style="font-size:13px">🍂 Seasonal deep cleans</b><p class="small" style="margin:4px 0 6px">Quarterly jobs counted in the same fair points as weekly chores.</p>${Object.entries(byQ).map(([q,list])=>`<div style="margin-top:8px"><span class="pill amber">${q}</span>${list.map(ins=>{const ch=chore(ins.choreId);const live=ins.claimedBy&&ins.status!=='done';return `<div class="logItem"><span>${ch.icon} ${ch.name} <span class="small">• ${ch.diff} pts</span></span><span>${live?room(ins.claimedBy).name+' • live':room(ins.assignee).name+' • '+ins.status+' • '+fmtDate(ins.date)}</span></div>`}).join('')}</div>`).join('')}</div>`;
+ }
+ el.innerHTML=html;
+ $('ledger').innerHTML=state.covers.length?state.covers.map(c=>`<div class="logItem"><span>${room(c.from).name} owes ${room(c.to).name} • ${c.chore}</span><b>${c.points} pts</b></div>`).join(''):'<p class="small">No swap debts.</p>';
+}
+
+function renderMore(){renderAlarms();renderGuest();renderCoverBalance();renderSetupMini();renderTrashSeg();renderExtras()}
+function alarmRow(key,title,desc,locked){
+ const on=!!state.alarms[key]; const isFinal=key==='trashFinal'; const disabled=isFinal&&!isManager();
+ return `<div class="toggleRow"><div><b>${title} ${isFinal?'<span class="pill red" style="margin-left:4px">10 PM • Mgr only</span>':''} ${locked?'<span class="pill">Locked</span>':''}</b><p>${desc}</p></div><button class="switch ${on?'on':''} ${disabled?'locked':''}" aria-label="${title}" onclick="toggleAlarm('${key}')"></button></div>`;
+}
+function renderAlarms(){
+ const el=$('alarmList');if(!el)return;
+ el.innerHTML=
+  alarmRow('myTurn','My turn notification','One ping when it is your turn. No repeats.')+
+  alarmRow('started','When someone starts','Heads-up that Live changed. Turn off for quiet.')+
+  alarmRow('trashGentle','Trash • gentle reminder','Daytime heads-up on trash day. Out after '+state.trash.out+'.')+
+  alarmRow('trashUrgent','Trash • urgent 7 PM','Only if not out yet. OFF by default.')+
+  alarmRow('trashLast','Trash • last call 9 PM','Final nudge before 10 PM. OFF by default.')+
+  alarmRow('trashFinal','Trash • FINAL 10:00 PM','Fires at 10 PM if trash is NOT marked done. Only manager can turn this off. Auto-off when done.')+
+  alarmRow('seasonal','Seasonal deep cleans','Heads-up 3 days before oven, fridge, windows & AC filter jobs. Quarterly only, not weekly noise.')+
+  alarmRow('covers','Cover requests','When someone posts "I\'m out".')+
+  alarmRow('audits','Audit result','When the weekly check is picked.');
+ const note=$('alarmManagerNote'); if(note) note.textContent=isManager()?'You are manager — you can turn the 10 PM final alarm off above. Members see it locked ON.':'You are not manager. You can turn off optional alarms, but the 10 PM final alarm stays as '+room(state.managerId).name+' set it ('+(state.alarms.trashFinal?'ON':'OFF')+'). Switch to Alex in demo to try manager view.';
+}
+function toggleAlarm(key){
+ if(key==='trashFinal'&&!isManager()){toast('10 PM alarm can only be turned off by manager '+room(state.managerId).name);renderAlarms();return}
+ state.alarms[key]=!state.alarms[key];renderAll();toast((key==='trashFinal'?'10 PM final alarm ':'Alarm ')+(state.alarms[key]?'ON':'OFF')+(key==='trashFinal'&&!state.alarms[key]?' • manager turned it off':''));
+}
+function setAllAlarms(v){
+ Object.keys(state.alarms).forEach(k=>{
+  if(k==='trashFinal'){ if(isManager()) state.alarms[k]=v; }
+  else state.alarms[k]=v;
+ });
+ renderAll();toast(v?'Optional alarms ON'+(isManager()?' + 10 PM ON':' • 10 PM stays manager-set'):'Optional alarms OFF • quiet mode'+(isManager()?'':' • 10 PM still '+(state.alarms.trashFinal?'ON':'OFF')));
+}
+
+function renderGuest(){
+ const g=$('guestHostSeg');if(g)g.innerHTML=state.roommates.map(r=>`<button class="${state.selectedGuestHost===r.id?'on':''}" onclick="state.selectedGuestHost='${r.id}';renderMore()">${r.name}</button>`).join('');
+ let counts={};state.guests.forEach(x=>counts[x.host]=(counts[x.host]||0)+1);
+ const over=Object.entries(counts).find(([h,c])=>c>=state.guestThreshold);
+ const el=$('guestStatus');if(el)el.innerHTML=state.roommates.map(r=>`<div class="logItem"><span>${r.name}</span><b>${counts[r.id]||0} nights</b></div>`).join('')+(over?`<div style="margin-top:10px;background:var(--amberBg);padding:10px;border-radius:12px;font-size:13px"><b>${room(over[0]).name}</b> hit the limit. App added +3 pts next week. No one had to confront them.</div>`:`<p class="small" style="margin-top:8px">Limit: ${state.guestThreshold} nights/week • Reporter never shown • Change limit in House profile</p>`);
+}
+function logGuest(){state.guests.push({host:state.selectedGuestHost,date:new Date()});renderAll();toast('Logged anonymously ✓')}
+
+function renderCoverBalance(){
+ const el=$('coverBalance');if(!el)return;
+ let bal={}; state.roommates.forEach(r=>bal[r.id]=0);
+ state.covers.forEach(c=>{bal[c.to]+=c.price||c.points; bal[c.from]-=(c.price||c.points)});
+ state.bounties.filter(b=>b.status==='confirmed'&&b.mode==='cash'&&b.claimer).forEach(b=>{bal[b.claimer]+=b.price; bal[b.from]-=b.price});
+ el.innerHTML=state.roommates.map(r=>`<div class="logItem"><span>${r.name}</span><b>${bal[r.id]===0?'Square':bal[r.id]>0?'Gets $'+bal[r.id]:'Owes $'+Math.abs(bal[r.id])}</b></div>`).join('')+'<p class="small" style="margin:8px 0 0">Confirmed covers and swaps settle here.</p>';
+}
+
+function renderSetupMini(){
+ const mb=$('managerBox');if(mb){const mgr=room(state.managerId);mb.innerHTML=`<div class="logItem"><span><b>${mgr.name}</b> <span class="pill teal">Manager 👑</span> <span class="pill ${state.locked?'red':'green'}">${state.locked?'Locked':'Open'}</span></span><span>${isManager()?'You':'—'}</span></div><div style="display:flex;gap:7px;margin-top:10px;flex-wrap:wrap">${isManager()?(state.locked?`<button class="btn primary" onclick="setLocked(false)">Unlock rules</button>`:`<button class="btn dark" onclick="setLocked(true)">Lock rules</button>`):`<span class="pill amber">Only ${mgr.name} can edit rules</span>`}<button class="btn ghost" onclick="toast('Manager can hand over crown from roommate list in full version')">Hand over crown</button></div><p class="small" style="margin-top:8px">House name, colour, guest limit and quiet hours live in House profile above — manager-only.</p>`}
+ const rl=$('roommateList');if(rl)rl.innerHTML=state.roommates.map(r=>`<div class="logItem"><span><span class="av" style="background:${r.color};width:24px;height:24px;font-size:11px;display:inline-grid;vertical-align:middle;margin-right:6px">${r.name[0]}</span><b>${r.name}</b> ${r.id===state.managerId?'👑':''}</span><span style="display:flex;gap:6px;align-items:center"><span class="pill">${r.streak}d streak</span>${isManager()&&r.id!==state.managerId?`<button class="btn ghost" style="padding:6px 9px;font-size:12px" onclick="makeManager('${r.id}')">Make mgr</button>`:''}</span></div>`).join('');
+ const cl=$('choreList');if(cl)cl.innerHTML=state.chores.filter(c=>!c.seasonal).map(c=>`<div class="logItem"><span>${c.icon} <b>${c.name}</b><br><span class="small">${c.diff} pts • ${c.count}×/${c.period} • $${c.price} cover</span></span><button class="btn ghost" style="padding:7px 10px;font-size:12px" onclick="cycleChore('${c.id}')">+1 pt</button></div>`).join('');
+ const ssl=$('seasonalSetupList');
+ if(ssl){
+   const seasonals=state.chores.filter(c=>c.seasonal);
+   if(!seasonals.length) ssl.innerHTML='<p class="small">No seasonal cleans yet. Add one below.</p>';
+   else ssl.innerHTML=seasonals.map(c=>`<div class="logItem" style="align-items:flex-start"><span style="flex:1">${c.icon} <b>${c.name}</b><br><span class="small">${c.diff} suck-points • ${c.count}×/${c.period} • $${c.price} cover • auto 4×/year</span><div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap"><button class="btn ghost" style="padding:6px 9px;font-size:12px" onclick="adjustSeasonalDiff('${c.id}',-1)">− pts</button><span class="pill teal">${c.diff} pts</span><button class="btn ghost" style="padding:6px 9px;font-size:12px" onclick="adjustSeasonalDiff('${c.id}',1)">+ pts</button><button class="btn ghost" style="padding:6px 9px;font-size:12px" onclick="cycleSeasonalFreq('${c.id}')">Freq: ${c.period}</button><button class="btn ghost" style="padding:6px 9px;font-size:12px;color:var(--red)" onclick="removeSeasonal('${c.id}')">Remove</button></div></span></div>`).join('');
+ }
+}
+function makeManager(id){if(!isManager()){toast('Only manager can hand over');return} state.managerId=id; renderAll(); toast(room(id).name+' is now manager 👑')}
+function cycleChore(id){if(!guardEdit())return; const c=chore(id); c.diff=c.diff>=5?1:c.diff+1; c.price=c.diff<=1?1:c.diff<=3?2:3; generate(); toast(c.name+' now '+c.diff+' pts')}
+function adjustSeasonalDiff(id,delta){if(!guardEdit())return; const c=chore(id); c.diff=Math.max(1,Math.min(6,c.diff+delta)); c.price=c.diff; generate(); toast(c.name+' → '+c.diff+' suck-points • rotation rebalanced')}
+function cycleSeasonalFreq(id){if(!guardEdit())return; const c=chore(id); const order=['quarter','half-year','month']; const cur=order.indexOf(c.period); const nxt=order[(cur+1)%order.length]; c.period=nxt; if(nxt==='quarter')c.count=1; if(nxt==='half-year')c.count=1; if(nxt==='month')c.count=1; generate(); toast(c.name+' now 1×/'+nxt+(nxt==='quarter'?' • 4×/year':nxt==='half-year'?' • 2×/year':' • monthly'))}
+function removeSeasonal(id){if(!guardEdit())return; const c=chore(id); state.chores=state.chores.filter(x=>x.id!==id); generate(); toast('Removed '+c.name)}
+function addSeasonal(){if(!guardEdit())return; const pool=[{name:'Garage sweep-out',icon:'🚗',bg:'#F3E8FF',diff:3},{name:'Mattress flip & wash',icon:'🛏️',bg:'#FFE4E6',diff:3},{name:'Pantry purge',icon:'🥫',bg:'#FEF3C7',diff:2},{name:'Balcony washdown',icon:'🌿',bg:'#DCFCE7',diff:3}]; const used=new Set(state.chores.map(c=>c.name)); const nxt=pool.find(p=>!used.has(p.name))||{name:'Deep clean '+(state.chores.filter(c=>c.seasonal).length+1),icon:'✨',bg:'#E0E7FF',diff:3}; state.chores.push({id:'s'+Date.now(),name:nxt.name,icon:nxt.icon,bg:nxt.bg,diff:nxt.diff,count:1,period:'quarter',price:nxt.diff,seasonal:true,season:'Custom'}); generate(); toast('Added '+nxt.name+' • quarterly, '+nxt.diff+' pts')}
+function resetSeasonal(){if(!guardEdit())return; state.chores=state.chores.filter(c=>!c.seasonal); state.chores.push({id:'s1',name:'Oven deep clean',icon:'🔥',bg:'#FFEDD5',diff:5,count:1,period:'quarter',price:5,seasonal:true,season:'Fall'},{id:'s2',name:'Fridge cleanout',icon:'🧊',bg:'#E0F2FE',diff:4,count:1,period:'quarter',price:4,seasonal:true,season:'Fall'},{id:'s3',name:'Window washing',icon:'🪟',bg:'#FEF9C3',diff:4,count:1,period:'quarter',price:4,seasonal:true,season:'Fall'},{id:'s4',name:'AC filter check',icon:'🌬️',bg:'#DCFCE7',diff:2,count:1,period:'quarter',price:2,seasonal:true,season:'Fall'}); generate(); toast('Seasonal defaults restored • 4 quarterly jobs')}
+function setLocked(v){if(!isManager()){toast('Only manager can do that');return}state.locked=v;renderAll();toast(v?'Locked ✓ Members can do turns but not edit rules':'Unlocked • manager can edit')}
+function renderTrashSeg(){
+ const days=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];const seg=$('trashDaysSeg');if(seg)seg.innerHTML=[1,2,3,4,5,6,0].map(d=>`<button class="${state.trashDays.includes(d)?'on':''}" onclick="toggleTrashDay(${d})">${days[d]}</button>`).join('');
+ const to=$('tOut'),tu=$('tUrgent'),tl=$('tLast'),tt=$('tTruck');if(to)to.value=state.trash.out;if(tu)tu.value=state.trash.urgent;if(tl)tl.value=state.trash.last;if(tt)tt.value=state.trash.truck;
+}
+function toggleTrashDay(d){if(!guardEdit())return;state.trashDays=state.trashDays.includes(d)?state.trashDays.filter(x=>x!==d):[...state.trashDays,d];renderMore()}
+function saveTrash(){if(!guardEdit())return;state.trash={out:$('tOut').value,urgent:$('tUrgent').value,last:$('tLast').value,truck:$('tTruck').value};renderAll();toast('Trash rules saved')}
+function renderExtras(){
+ const el=$('extrasList'); if(!el) return;
+ el.innerHTML=`
+ <div class="suggest"><b style="font-size:13px">🧴 Supplies stock</b><p class="small" style="margin:4px 0 0">Trash bags & spray logged. Add “low stock” ping — when anyone marks supplies low, manager gets a list before the next shop.</p><button class="btn ghost" style="margin-top:8px;padding:7px 10px;font-size:12px" onclick="toast('Added to shopping list: trash bags, spray, dish soap')">Mark supplies low</button></div>
+ <div class="suggest"><b style="font-size:13px">🌙 Quiet hours</b><p class="small" style="margin:4px 0 0">No non-urgent pings after ${state.quietAfter}. 10 PM trash final is the only exception, and only if not done.</p></div>
+ <div class="suggest"><b style="font-size:13px">📊 Fairness report (monthly)</b><p class="small" style="margin:4px 0 0">Points balanced by difficulty × frequency. Bathroom & mop are 3 pts, at least twice a month — engine auto-schedules the second clean by the 20th if missed.</p></div>
+ <div class="suggest"><b style="font-size:13px">🔁 Auto re-balance</b><p class="small" style="margin:4px 0 0">Covers create swap debt. Next week’s rotation quietly gives the coverer fewer points and the person who was out more — no spreadsheet needed.</p></div>`;
+}
+
+function runAudit(){
+ const doneOnes=state.instances.filter(i=>i.status==='done');const pick=doneOnes[Math.floor(Math.random()*doneOnes.length)]||state.instances[0];const auditor=state.roommates.find(r=>r.id!==pick.assignee)||state.roommates[0];state.audit={instanceId:pick.id,auditor:auditor.id,result:null};renderAudit();toast(state.alarms.audits?'Audit for '+room(auditor).name:'Audit picked (shown here, alarm off)');
+}
+function renderAudit(){
+ const el=$('auditBox');if(!el)return;if(!state.audit){el.innerHTML='<p class="small">No audit yet this week.</p>';return}
+ const ins=state.instances.find(i=>i.id===state.audit.instanceId);const ch=chore(ins.choreId);
+ el.innerHTML=`<div class="task" style="border:none;padding:0"><div class="taskIcon" style="background:${ch.bg}">${ch.icon}</div><div class="taskMain"><div class="taskTitle">${ch.name}</div><div class="meta">${fmtDate(ins.date)} • by ${room(ins.doneBy||ins.assignee).name} • Checker: <b>${room(state.audit.auditor).name}</b></div><div class="actions">${state.audit.result?`<span class="pill ${state.audit.result==='pass'?'green':'red'}">${state.audit.result}</span>`:`<button class="btn primary" onclick="auditResult('pass')">Looks good ✓</button><button class="btn ghost" onclick="auditResult('fail')">Redo</button>`}</div></div></div>`;
+}
+function auditResult(r){state.audit.result=r;renderAudit();toast(r==='pass'?'Audit passed ✓':'Needs redo')}
+
+let partySec=1800,partyInt=null;
+function startParty(){$('partyBox').classList.remove('hidden');$('partyStartBtn').classList.add('hidden');if(partyInt)return;partyInt=setInterval(()=>{partySec--;let m=String(Math.floor(partySec/60)).padStart(2,'0'),s=String(partySec\%60).padStart(2,'0');$('partyTimer').textContent=m+':'+s;if(partySec<=0)stopParty()},1000);toast('Party started • 30 min together')}
+function stopParty(){clearInterval(partyInt);partyInt=null;partySec=1800;$('partyTimer').textContent='30:00';$('partyBox').classList.add('hidden');$('partyStartBtn').classList.remove('hidden')}
+
+/* ---------- Plain-words Smart Setup ---------- */
+const SETUP_EXAMPLES=[
+"4 of us: Alex, Maya, Jon, Priya. Trash goes out Tuesday and Friday nights, bathroom needs cleaning twice a month, kitchen gets messy fast so weekly, sweep and mop twice a month, we have stairs and a living room.",
+"There are 3 of us — Sam, Riley and Noor. Trash on Monday night only, kitchen clean every week, bathroom once a week, living room tidy weekly. No stairs.",
+"5 roommates: Ben, Chloe, Dev, Emma, Finn. Trash Wednesday and Saturday, kitchen gets messy fast so twice a week, bathrooms twice a month, sweep and mop twice a month, stairs and hallway weekly, living room weekly."
+];
+const DAY_MAP={sunday:0,sun:0,monday:1,mon:1,tuesday:2,tue:2,tues:2,wednesday:3,wed:3,thursday:4,thu:4,thur:4,thurs:4,friday:5,fri:5,saturday:6,sat:6};
+const CHORE_CATALOG=[
+ {key:'trash',match:/\btrash|garbage|rubbish\b/i,name:'Take out trash',icon:'🗑️',bg:'#FEF3C7',diff:1,defCount:2,defPeriod:'week',price:1},
+ {key:'bathroom',match:/\bbathroom|toilet|shower\b/i,name:'Bathroom scrub',icon:'🚿',bg:'#FCE7F3',diff:3,defCount:2,defPeriod:'month',price:3},
+ {key:'kitchen',match:/\bkitchen\b/i,name:'Kitchen clean',icon:'🍳',bg:'#CCFBF1',diff:3,defCount:1,defPeriod:'week',price:2},
+ {key:'mop',match:/\b(sweep|mop|broom|vacuum|hoover)\b/i,name:'Sweep & mop',icon:'🧹',bg:'#DBEAFE',diff:3,defCount:2,defPeriod:'month',price:2},
+ {key:'stairs',match:/\bstairs|hallway|landing\b/i,name:'Stairs & hallway',icon:'🪜',bg:'#EDE9FE',diff:2,defCount:1,defPeriod:'week',price:1.5},
+ {key:'living',match:/\bliving room|lounge|sitting room\b/i,name:'Living room tidy',icon:'🛋️',bg:'#DCFCE7',diff:2,defCount:1,defPeriod:'week',price:1.5},
+ {key:'dishes',match:/\bdishes|dishwasher\b/i,name:'Dishes',icon:'🍽️',bg:'#FFEDD5',diff:2,defCount:3,defPeriod:'week',price:1},
+ {key:'laundry',match:/\blaundry\b/i,name:'Laundry room',icon:'👕',bg:'#E0F2FE',diff:2,defCount:1,defPeriod:'week',price:1.5},
+];
+function openSmartSetup(){
+ $('setupModal').classList.remove('hidden');
+ $('setupStep1').classList.remove('hidden');$('setupStep2').classList.add('hidden');
+ setTimeout(()=>{const t=$('setupText'); if(t) t.focus()},80);
+ document.body.style.overflow='hidden';
+}
+function closeSmartSetup(){
+ $('setupModal').classList.add('hidden');
+ document.body.style.overflow='';
+ state.setupSeen=true;
+ const b=$('smartSetupBanner'); if(b) b.style.display='none';
+}
+function backToDescribe(){
+ $('setupStep2').classList.add('hidden');$('setupStep1').classList.remove('hidden');
+}
+function useExample(i){
+ $('setupText').value=SETUP_EXAMPLES[i];
+ toast('Example loaded — tap Set up my house');
+ $('setupText').focus();
+}
+function startDictation(){
+ const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+ const hint=$('micHint');
+ if(!SR){ if(hint) hint.textContent='Voice not supported here — typing works great.'; toast('Voice not supported in this browser — you can type instead'); return }
+ try{
+  const rec=new SR(); rec.lang='en-US'; rec.interimResults=false;
+  const btn=$('micBtn'); btn.textContent='🎙️ Listening… tap to stop'; if(hint) hint.textContent='Speak now: names, chores, trash nights…';
+  rec.onresult=(e)=>{ const txt=e.results[0][0].transcript; const ta=$('setupText'); ta.value=(ta.value?ta.value+' ':'')+txt; btn.textContent='🎙️ Speak instead'; if(hint) hint.textContent='Got it — review and tap Set up my house.'; };
+  rec.onerror=()=>{ btn.textContent='🎙️ Speak instead'; if(hint) hint.textContent='Could not hear that — try typing.'; };
+  rec.onend=()=>{ btn.textContent='🎙️ Speak instead'; };
+  rec.start();
+ }catch(err){ toast('Voice unavailable — typing works great') }
+}
+function extractNames(text){
+ let names=[];
+ const colonIdx=text.indexOf(':');
+ let segment='';
+ if(colonIdx>-1) segment=text.slice(colonIdx+1).split(/[\.\n]/)[0];
+ if(!segment){
+   const m=text.match(/(?:of us|roommates|we are|we're|us)\s*[—\-:]\s*([^\.\n]+)/i);
+   if(m) segment=m[1];
+ }
+ if(segment){
+   names=segment.split(/,| and /i).map(s=>s.trim()).map(s=>s.replace(/^(and\s+)/i,'').trim()).filter(Boolean).map(s=>{
+     s=s.split(/\s+(trash|kitchen|bathroom|we|our|the)\b/i)[0].trim();
+     const w=s.split(/\s+/)[0].replace(/[^A-Za-z\-']/g,'');
+     return w? w.charAt(0).toUpperCase()+w.slice(1) : '';
+   }).filter(w=>w.length>=2 && w.length<=16 && !/^(trash|kitchen|bathroom|weekly|night|nights)$/i.test(w));
+ }
+ if(names.length<2){
+   const cap=[...text.matchAll(/\b([A-Z][a-z]{1,14})\b/g)].map(m=>m[1]);
+   const stop=new Set(['Trash','Tuesday','Friday','Monday','Wednesday','Thursday','Saturday','Sunday','Kitchen','Bathroom']);
+   names=cap.filter(n=>!stop.has(n));
+   names=[...new Set(names)].slice(0,6);
+ }
+ const countMatch=text.match(/(\d+)\s*(?:of us|roommates|people)/i);
+ if(countMatch && names.length===0){
+   const n=parseInt(countMatch[1],10);
+   const pool=['Alex','Maya','Jon','Priya','Sam','Riley'];
+   names=pool.slice(0,Math.min(Math.max(n,2),6));
+ }
+ return [...new Set(names)].slice(0,6);
+}
+function freqForSentence(sentence, defCount, defPeriod){
+ const s=' '+sentence.toLowerCase()+' ';
+ if(/\btwice a week|2x a week|two times a week\b/.test(s)) return {count:2,period:'week'};
+ if(/\bthree times a week|3x a week\b/.test(s)) return {count:3,period:'week'};
+ if(/\bdaily|every day\b/.test(s)) return {count:5,period:'week'};
+ if(/\btwice a month|2x a month|two times a month\b/.test(s)) return {count:2,period:'month'};
+ if(/\bonce a week|weekly|every week\b/.test(s)) return {count:1,period:'week'};
+ if(/\bonce a month|monthly\b/.test(s)) return {count:1,period:'month'};
+ if(/\bevery two weeks|fortnight/.test(s)) return {count:2,period:'month'};
+ return {count:defCount,period:defPeriod};
+}
+function parseSmartSetup(){
+ const text=($('setupText').value||'').trim();
+ if(text.length<12){ toast('Tell us a bit more — who lives there and what needs doing?'); return }
+ const lower=text.toLowerCase();
+ const names=extractNames(text);
+ let trashDays=[];
+ Object.entries(DAY_MAP).forEach(([word,num])=>{
+   if(new RegExp('\\b'+word+'\\b','i').test(lower) && /trash|garbage/.test(lower)){
+     if(!trashDays.includes(num)) trashDays.push(num);
+   }
+ });
+ if(!trashDays.length) trashDays=[1,4];
+ trashDays.sort((a,b)=>a-b);
+ const clauses=text.split(/[,;\.\n]/).map(s=>s.trim()).filter(Boolean);
+ const found=new Map();
+ CHORE_CATALOG.forEach(cat=>{
+   if(cat.match.test(text)){
+     const clause=clauses.find(c=>cat.match.test(c))||text;
+     let {count,period}=freqForSentence(clause, cat.defCount, cat.defPeriod);
+     if(cat.key==='kitchen' && /messy fast|gets messy|busy/.test(lower) && period==='week' && count===1){
+       if(/twice a week/.test(lower)) count=2;
+     }
+     if(cat.key==='trash'){ count=Math.max(1,trashDays.length); period='week'; }
+     found.set(cat.key,{...cat,count,period});
+   }
+ });
+ if(!found.has('trash')) found.set('trash',{...CHORE_CATALOG[0],count:trashDays.length,period:'week'});
+ if(found.size<3 && !found.has('kitchen')) found.set('kitchen',{...CHORE_CATALOG[2]});
+ if(found.size<3 && !found.has('bathroom')) found.set('bathroom',{...CHORE_CATALOG[1]});
+ const chores=[...found.values()].map((c,i)=>({id:'c'+(i+1),name:c.name,icon:c.icon,bg:c.bg,diff:c.diff,count:c.count,period:c.period,price:c.price}));
+ const roommateNames = names.length>=2 ? names : ['Alex','Maya','Jon','Priya'];
+ const draftRoommates=roommateNames.map((n,i)=>({id:'r'+(i+1),name:n,color:COLORS[i%COLORS.length],streak:0}));
+ state.setupDraft={text,roommates:draftRoommates,chores,trashDays};
+ renderSetupReview();
+ $('setupStep1').classList.add('hidden');$('setupStep2').classList.remove('hidden');
+}
+function renderSetupReview(){
+ const d=state.setupDraft; if(!d) return;
+ $('setupSummary').textContent=`${d.roommates.length} roommates • ${d.chores.length} chores • Trash ${d.trashDays.length} night${d.trashDays.length>1?'s':''} a week • Points balanced automatically.`;
+ $('reviewRoommateCount').textContent=d.roommates.length+' people';$('reviewRoommates').innerHTML=d.roommates.map((r,i)=>`<div class="reviewRow"><span class="av" style="background:${r.color}">${r.name[0]}</span><input class="miniInput" style="flex:1" value="${r.name}" oninput="updateDraftRoommate(${i},this.value)"><span class="pill">${i===0?'Manager 👑':'Member'}</span><button class="btn ghost" style="padding:7px 10px" onclick="removeDraftRoommate(${i})" aria-label="Remove ${r.name}">✕</button></div>`).join('');
+ $('reviewChores').innerHTML=d.chores.map((c,i)=>`<div class="reviewRow" style="align-items:flex-start"><span style="font-size:20px;width:36px;text-align:center;flex-shrink:0">${c.icon}</span><div style="flex:1;min-width:0"><input class="miniInput" style="width:100%" value="${c.name}" oninput="updateDraftChoreName(${i},this.value)"><div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap;align-items:center"><button class="btn ghost" style="padding:6px 9px" onclick="adjustDraftChoreDiff(${i},-1)">−</button><span class="pill teal">${c.diff} suck-pts</span><button class="btn ghost" style="padding:6px 9px" onclick="adjustDraftChoreDiff(${i},1)">+</button><select class="miniSelect" onchange="updateDraftChoreFreq(${i},this.value)"><option value="1-week" ${c.count===1&&c.period==='week'?'selected':''}>1× / week</option><option value="2-week" ${c.count===2&&c.period==='week'?'selected':''}>2× / week</option><option value="3-week" ${c.count===3&&c.period==='week'?'selected':''}>3× / week</option><option value="1-month" ${c.count===1&&c.period==='month'?'selected':''}>1× / month</option><option value="2-month" ${c.count===2&&c.period==='month'?'selected':''}>2× / month</option></select><button class="btn ghost" style="padding:6px 9px;color:var(--red)" onclick="removeDraftChore(${i})">Remove</button></div></div></div>`).join('');
+ const dayNames=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+ $('reviewTrashSeg').innerHTML=[1,2,3,4,5,6,0].map(day=>`<button class="${d.trashDays.includes(day)?'on':''}" onclick="toggleDraftTrashDay(${day})">${dayNames[day]}</button>`).join('');
+ $('reviewTrashNote').textContent='Trash goes out after 6 PM, last alarm 9 PM, final 10 PM if not done (manager-only off). Days above set the gentle reminders.';
+ const totals={}; d.roommates.forEach(r=>totals[r.id]=0);
+ const preview=[];
+ [...d.chores].sort((a,b)=>b.diff-a.diff).forEach(c=>{
+   const who=[...d.roommates].sort((a,b)=>totals[a.id]-totals[b.id])[0];
+   totals[who.id]+=c.diff;
+   preview.push({chore:c,who});
+ });
+ $('reviewRotation').innerHTML=preview.map(p=>`<div class="logItem"><span>${p.chore.icon} ${p.chore.name}</span><span><span class="av" style="background:${p.who.color};width:22px;height:22px;font-size:10px;display:inline-grid;vertical-align:middle;margin-right:5px">${p.who.name[0]}</span>${p.who.name} • ${p.chore.diff} pts</span></div>`).join('')+`<div style="margin-top:10px">${d.roommates.map(r=>`<div style="display:flex;align-items:center;gap:8px;margin:6px 0;font-size:13px"><span class="av" style="background:${r.color};width:24px;height:24px;font-size:11px">${r.name[0]}</span><span style="width:64px;font-weight:800">${r.name}</span><div style="flex:1;height:8px;background:var(--line);border-radius:999px;overflow:hidden"><div style="height:100%;width:${totals[r.id]/Math.max(...Object.values(totals),1)*100}%;background:${r.color}"></div></div><b>${totals[r.id]} pts</b></div>`).join('')}</div><p class="small">Balanced within a point or two — heavier jobs (bathroom, mop) spread so no one gets stuck.</p>`;
+}
+function updateDraftRoommate(i,v){ if(state.setupDraft) state.setupDraft.roommates[i].name=v.trim()||state.setupDraft.roommates[i].name }
+function removeDraftRoommate(i){ const d=state.setupDraft; if(d.roommates.length<=2){toast('Need at least 2 roommates');return} d.roommates.splice(i,1); d.roommates.forEach((r,idx)=>r.id='r'+(idx+1)); renderSetupReview() }
+function addReviewRoommate(){ const v=($('newRoommateName').value\vert{}\vert{}'').trim(); if(!v){toast('Type a name first');return} const d=state.setupDraft; d.roommates.push({id:'r'+(d.roommates.length+1),name:v.charAt(0).toUpperCase()+v.slice(1),color:COLORS[d.roommates.length\%COLORS.length],streak:0});$('newRoommateName').value=''; renderSetupReview() }
+function updateDraftChoreName(i,v){ if(state.setupDraft) state.setupDraft.chores[i].name=v }
+function adjustDraftChoreDiff(i,delta){ const d=state.setupDraft; const c=d.chores[i]; c.diff=Math.max(1,Math.min(6,c.diff+delta)); c.price=c.diff<=1?1:c.diff<=3?2:3; renderSetupReview() }
+function updateDraftChoreFreq(i,val){ const d=state.setupDraft; const [n,p]=val.split('-'); d.chores[i].count=parseInt(n,10); d.chores[i].period=p; if(d.chores[i].name.toLowerCase().includes('trash')){ } renderSetupReview() }
+function removeDraftChore(i){ const d=state.setupDraft; if(d.chores.length<=2){toast('Keep at least 2 chores');return} d.chores.splice(i,1); renderSetupReview() }
+function addReviewChore(){ const v=($('newChoreName').value||'').trim(); if(!v){toast('Name the chore first');return} const d=state.setupDraft; const lower=v.toLowerCase(); let icon='🧹',diff=2,bg='#EDE9FE'; if(/bath/.test(lower)){icon='🚿';diff=3;bg='#FCE7F3'} else if(/kitchen|dish/.test(lower)){icon='🍳';diff=3;bg='#CCFBF1'} else if(/trash/.test(lower)){icon='🗑️';diff=1;bg='#FEF3C7'} else if(/stair/.test(lower)){icon='🪜';diff=2} d.chores.push({id:'c'+Date.now(),name:v.charAt(0).toUpperCase()+v.slice(1),icon,bg,diff,count:1,period:'week',price:diff<=1?1:diff<=3?2:3}); $('newChoreName').value=''; renderSetupReview() }
+function toggleDraftTrashDay(day){ const d=state.setupDraft; if(d.trashDays.includes(day)){ if(d.trashDays.length<=1){toast('Keep at least one trash night');return} d.trashDays=d.trashDays.filter(x=>x!==day) } else d.trashDays=[...d.trashDays,day].sort((a,b)=>a-b);
+ const tc=d.chores.find(c=>/trash/i.test(c.name)); if(tc){ tc.count=d.trashDays.length; tc.period='week' }
+ renderSetupReview() }
+function applySmartSetup(){
+ const d=state.setupDraft; if(!d) return;
+ const seasonals=state.chores.filter(c=>c.seasonal);
+ state.roommates=d.roommates.map((r,i)=>({id:'r'+(i+1),name:r.name||('Roommate '+(i+1)),color:COLORS[i%COLORS.length],streak:0}));
+ const newChores=d.chores.map((c,i)=>({id:'c'+(i+1),name:c.name,icon:c.icon,bg:c.bg,diff:c.diff,count:c.count,period:c.period,price:c.price|| (c.diff<=1?1:c.diff<=3?2:3)}));
+ state.chores=[...newChores,...seasonals];
+ state.trashDays=[...d.trashDays];
+ state.currentUser=state.roommates[0].id;
+ state.managerId=state.roommates[0].id;
+ state.selectedGuestHost=state.roommates[1]?.id||state.roommates[0].id;
+ state.guests=[]; state.covers=[]; state.bounties=[]; state.audit=null;
+ state.setupSeen=true;
+ closeSmartSetup();
+ generate();
+ showPage('home');
+ toast(`House built ✓ ${state.roommates.length} roommates, ${newChores.length} chores, fair rotation ready`);
+}
+
+setInterval(()=>{if(activeCleaners().length){renderLive();renderHomeLiveOnly()}},30000);
+
+generate();
+showPage('home');
+setTimeout(()=>{ if(!state.setupSeen) openSmartSetup(); },650);
+</script>
+</body>
+</html>
