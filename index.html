@@ -1,14 +1,3 @@
-I hear your frustration—it is incredibly annoying when a page loads perfectly but the buttons just play dead. When this happens, it almost always means the browser encountered a tiny, invisible JavaScript crash in the background (usually due to how different browsers handle function overrides, or because an old, broken test save is stuck in the memory).
-
-To guarantee this works, I have made this version completely bulletproof:
-
-1. **Removed the risky function override:** I integrated the `saveState()` feature directly into the main render cycle so it won't crash on restrictive browsers like Safari.
-2. **Added "Crash-Proof" Fallbacks:** If the app tries to load a task from your history but the chore was deleted, it will gracefully show "Deleted Chore" instead of crashing the whole page.
-3. **Changed the Save Key:** I renamed the internal storage to `roommate_app_v3`. This forces the app to completely ignore any broken data stuck in your browser and start completely fresh.
-
-Copy this entire block, replace the contents of your `index.html` file on GitHub, and click **Commit changes**. Wait exactly 2 minutes, go to your live link, and perform a **Hard Refresh** (Ctrl + F5 on Windows, Cmd + Shift + R on Mac).
-
-```html
 <!doctype html>
 <html lang="en">
 <head>
@@ -382,8 +371,7 @@ window.onerror = function(msg, url, line) {
 const COLORS=['#0F766E','#D97706','#2563EB','#DB2777','#7C3AED','#059669','#DC2626','#0891B2'];
 const ACCENTS=[{name:'Teal',value:'#0F766E'},{name:'Terracotta',value:'#C2410C'},{name:'Sage',value:'#4D7C0F'},{name:'Ocean',value:'#0369A1'},{name:'Plum',value:'#86198F'},{name:'Charcoal',value:'#1C1917'}];
 
-// Changed Save Key to guarantee a fresh start
-const STORAGE_KEY = 'roommate_app_v3';
+const STORAGE_KEY = 'roommate_app_v4';
 
 const defaultState = {
  houseName:'Maple House', houseTagline:'Fair turns, no group-chat nagging.', accent:'#0F766E', quietAfter:'22:00',
@@ -399,7 +387,7 @@ const defaultState = {
  ],
  chores:[
   {id:'c1',name:'Take out trash',icon:'🗑️',bg:'#FEF3C7',diff:1,count:2,period:'week',price:1},
-  {id:'c2',name:'Kitchen clean',icon:'🍳',bg:'#CCFBF1',diff:3,count:1,period:'week',price:2},
+  {id:'c2',name:'Kitchen clean',icon:'🍳',bg:'#CCFBF1',diff:3,count:1,period:'week',price:2, teamSize:2},
   {id:'c3',name:'Bathroom scrub',icon:'🚿',bg:'#FCE7F3',diff:3,count:2,period:'month',price:3},
   {id:'c4',name:'Sweep & mop',icon:'🧹',bg:'#DBEAFE',diff:3,count:2,period:'month',price:2},
   {id:'c5',name:'Living room tidy',icon:'🛋️',bg:'#DCFCE7',diff:2,count:1,period:'week',price:1.5},
@@ -445,7 +433,6 @@ let state = loadState();
 
 function $(id){return document.getElementById(id)}
 
-// Safe getters to prevent crashes if a roommate or chore was accidentally deleted
 function room(id){
     const r = state.roommates.find(r=>r.id===id);
     return r ? r : {name:'Unknown', color:'#ccc', id:id, streak:0};
@@ -463,7 +450,7 @@ function guardEdit(){if(!isManager()){toast('Only manager '+room(state.managerId
 function applyAccent(){document.documentElement.style.setProperty('--accent',state.accent);document.documentElement.style.setProperty('--teal',state.accent)}
 
 function generate(){
- state.instances=[];let base=new Date('2026-10-02T12:00:00');let totals={};state.roommates.forEach(r=>totals[r.id]=0);let raw=[];
+ state.instances=[];let base=new Date('2026-10-02T12:00:00');let raw=[];
  function addDays(off){let d=new Date(base);d.setDate(base.getDate()+off);return d}
  state.chores.forEach(ch=>{
   if(ch.id==='c1'){let found=0,off=0;while(found<4&&off<21){let d=addDays(off);if(state.trashDays.includes(d.getDay())){raw.push({choreId:ch.id,date:d});found++}off++}}
@@ -481,10 +468,20 @@ function generate(){
   }
   else{[2,12].slice(0,ch.count).forEach(o=>raw.push({choreId:ch.id,date:addDays(o)}))}
  });
- raw.sort((a,b)=>chore(b.choreId).diff-chore(a.choreId).diff);
- raw.forEach((r,idx)=>{let assignee=[...state.roommates].sort((a,b)=>totals[a.id]-totals[b.id])[0];totals[assignee.id]+=chore(r.choreId).diff;state.instances.push({id:'i'+idx,choreId:r.choreId,date:r.date,assignee:assignee.id,status:idx<3?'done':'pending',doneBy:idx<3?assignee.id:null,claimedBy:null,mins:idx<3?(chore(r.choreId).diff*6+8):null,seasonal:!!r.seasonal,quarter:r.quarter||null})});
+ raw.sort((a,b)=>a.date-b.date);
+ let rIndex = 0;
+ raw.forEach((r,idx)=>{
+  let ch=chore(r.choreId);
+  let teamSize = ch.teamSize || 1;
+  let assignees = [];
+  for(let i=0; i<teamSize; i++){
+    assignees.push(state.roommates[rIndex % state.roommates.length].id);
+    rIndex++;
+  }
+  state.instances.push({id:'i'+idx,choreId:r.choreId,date:r.date,assignee:assignees,status:idx<3?'done':'pending',doneBy:idx<3?assignees[0]:null,claimedBy:null,mins:idx<3?(ch.diff*6+8):null,seasonal:!!r.seasonal,quarter:r.quarter||null});
+ });
  state.instances.sort((a,b)=>a.date-b.date);
- state.bounties=[];let seed=state.instances.find(i=>i.status!=='done'&&chore(i.choreId).name.includes('Sweep'))||state.instances.find(i=>i.status!=='done');if(seed)state.bounties=[{id:'b1',instanceId:seed.id,from:seed.assignee,price:chore(seed.choreId).price,mode:'swap',status:'open'}];
+ state.bounties=[];let seed=state.instances.find(i=>i.status!=='done'&&chore(i.choreId).name.includes('Sweep'))||state.instances.find(i=>i.status!=='done');if(seed)state.bounties=[{id:'b1',instanceId:seed.id,from:seed.assignee[0],price:chore(seed.choreId).price,mode:'swap',status:'open'}];
  if(!state.guests.length)state.guests=[{host:'r2',date:new Date()},{host:'r2',date:new Date()}];
  if(!state.covers.length&&state.roommates.length>2)state.covers=[{from:state.roommates[0].id,to:state.roommates[2].id,points:3,chore:'Kitchen clean',price:2}];
  applyAccent();
@@ -502,7 +499,7 @@ function setUser(id){state.currentUser=id;renderAll();toast('Hi '+room(id).name+
 
 function renderAll(){
   renderActing();renderHome();renderTasks();renderLive();renderBounty();renderMonth();renderMore();
-  saveState(); // Safely placed directly inside the main UI update loop
+  saveState();
 }
 
 function renderActing(){
@@ -537,7 +534,7 @@ function distinctCleaners(){const map={}; activeCleaners().forEach(i=>{ map[i.cl
 function elapsedMins(id){if(!state.timerStart[id])return state.timers[id]||1;return Math.max(1,Math.round((Date.now()-state.timerStart[id])/60000))}
 
 function renderHome(){
- const myNext=state.instances.find(i=>i.assignee===state.currentUser&&i.status!=='done'&&!i.claimedBy);
+ const myNext=state.instances.find(i=>i.assignee.includes(state.currentUser)&&i.status!=='done'&&!i.claimedBy);
  const notif=$('turnNotif');
  if(state.alarms.myTurn&&myNext){
   const ch=chore(myNext.choreId);
@@ -555,20 +552,23 @@ function renderHome(){
  if(act.length===0){$('livePreview').innerHTML=`<p class="small" style="margin:0">No one has started a chore yet. When someone taps Start, you'll see them here live.</p>`} else {
   $('livePreview').innerHTML=act.map(ins=>{const ch=chore(ins.choreId);const who=room(ins.claimedBy);return `<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-top:1px solid var(--line)"><span class="liveDot"></span><span class="av" style="background:${who.color}">${who.name[0]}</span><div style="flex:1"><b style="font-size:13px">${who.name}</b> <span class="small">• ${ch.name}</span><div class="small">${elapsedMins(ins.id)} min • in progress</div></div><span class="pill teal">Live</span></div>`}).join('');
  }
- const mine=state.instances.filter(i=>i.assignee===state.currentUser&&i.status!=='done').slice(0,3);
+ const mine=state.instances.filter(i=>i.assignee.includes(state.currentUser)&&i.status!=='done').slice(0,3);
  $('myTasks').innerHTML=mine.length?mine.map(ins=>taskRow(ins,true)).join(''):`<p class="small">Nothing assigned to you in the next turns. Nice.</p>`;
  const trashIns=state.instances.find(i=>i.choreId==='c1'&&i.status!=='done')||state.instances.find(i=>i.choreId==='c1');
  const doneTrash=trashIns&&trashIns.status==='done';
- $('trashSummary').textContent=trashIns?`${fmtDate(trashIns.date)} • ${room(trashIns.assignee).name}'s turn • Out after ${state.trash.out}, truck ${state.trash.truck}`:'No trash turn scheduled';
+ $('trashSummary').textContent=trashIns?`${fmtDate(trashIns.date)} • ${trashIns.assignee.map(id=>room(id).name).join(' & ')}'s turn • Out after ${state.trash.out}, truck ${state.trash.truck}`:'No trash turn scheduled';
  $('trashPill').textContent=doneTrash?'Out ✓':'Not out yet'; $('trashPill').className='pill '+(doneTrash?'green':'amber');
- $('trashAction').innerHTML=doneTrash?`<span class="pill green">Done • locked to one person • 10 PM alarm auto-off</span>`:trashIns?`<div style="display:flex;gap:7px;flex-wrap:wrap"><button class="btn primary" onclick="startTask('${trashIns.id}')">Start trash run</button><button class="btn ghost" onclick="toast(state.alarms.trashGentle?'Gentle reminder sent to ${room(trashIns.assignee).name}':'Trash gentle alarm is OFF')">Remind ${room(trashIns.assignee).name}</button></div>`:'';
+ $('trashAction').innerHTML=doneTrash?`<span class="pill green">Done • locked to one person • 10 PM alarm auto-off</span>`:trashIns?`<div style="display:flex;gap:7px;flex-wrap:wrap"><button class="btn primary" onclick="startTask('${trashIns.id}')">Start trash run</button><button class="btn ghost" onclick="toast(state.alarms.trashGentle?'Gentle reminder sent':'Trash gentle alarm is OFF')">Remind them</button></div>`:'';
  const finalOn=state.alarms.trashFinal;
  $('trashAlarmNote').textContent=doneTrash?'10:00 PM final alarm: OFF — trash already marked done.':(finalOn?`10:00 PM final alarm: ON (manager-locked) • fires if not done by 10 PM • Gentle ${state.alarms.trashGentle?'on':'off'}, 7 PM ${state.alarms.trashUrgent?'on':'off'}, 9 PM ${state.alarms.trashLast?'on':'off'}.`:`10:00 PM final alarm: OFF by manager • Gentle ${state.alarms.trashGentle?'on':'off'}, 7 PM ${state.alarms.trashUrgent?'on':'off'}, 9 PM ${state.alarms.trashLast?'on':'off'}.`);
  const done=state.instances.filter(i=>i.status==='done').length;
  $('weekLabel').textContent=done+' of '+state.instances.length+' done';
  $('weekPct').textContent=Math.round(done/state.instances.length*100)+'%';
  $('weekBar').style.width=(done/state.instances.length*100)+'%';
- let totals={};state.roommates.forEach(r=>totals[r.id]=0);state.instances.forEach(ins=>totals[ins.assignee]=(totals[ins.assignee]||0)+chore(ins.choreId).diff);
+ let totals={};state.roommates.forEach(r=>totals[r.id]=0);
+ state.instances.forEach(ins=>{
+  ins.assignee.forEach(a => { totals[a] = (totals[a]||0) + chore(ins.choreId).diff; });
+ });
  const max=Math.max(...Object.values(totals),1);
  $('balanceMini').innerHTML=state.roommates.map(r=>`<div style="display:flex;align-items:center;gap:8px;margin:7px 0;font-size:13px"><span class="av" style="background:${r.color};width:24px;height:24px;font-size:11px">${r.name[0]}</span><span style="width:52px;font-weight:800">${r.name}</span><div style="flex:1;height:8px;background:var(--line);border-radius:999px;overflow:hidden"><div style="height:100%;width:${totals[r.id]/max*100}%;background:${r.color}"></div></div><b>${totals[r.id]} pts</b></div>`).join('');
  renderSuggestions();
@@ -579,15 +579,17 @@ function renderSuggestions(){
  const bathroomNext=state.instances.find(i=>i.choreId==='c3'&&i.status!=='done');
  const suggestions=[];
  if(counts['r2']>=2) suggestions.push({icon:'👥',title:(room('r2')?room('r2').name:'A roommate')+' is close to the guest limit',body:counts['r2']+' guest nights this week. One more hits the '+state.guestThreshold+'-night limit and adds +3 pts automatically.'});
- if(bathroomNext) suggestions.push({icon:'🚿',title:'Bathroom due '+fmtDate(bathroomNext.date),body:room(bathroomNext.assignee).name+' is on it. Twice-a-month minimum is protected by the engine.'});
+ if(bathroomNext) suggestions.push({icon:'🚿',title:'Bathroom due '+fmtDate(bathroomNext.date),body:bathroomNext.assignee.map(id=>room(id).name).join(' & ')+' is on it. Twice-a-month minimum is protected by the engine.'});
  const act=activeCleaners(); if(act.length) suggestions.push({icon:'●',title:act.length+' chore'+(act.length>1?'s':'')+' live right now',body:act.map(i=>room(i.claimedBy).name+' • '+chore(i.choreId).name).join(' · ')});
- const nextSeasonal=state.instances.find(i=>i.seasonal&&i.status!=='done'); if(nextSeasonal) suggestions.push({icon:'🍂',title:'Seasonal: '+chore(nextSeasonal.choreId).name+' • '+fmtDate(nextSeasonal.date),body:room(nextSeasonal.assignee).name+' is on it • '+chore(nextSeasonal.choreId).diff+' suck-points • Quarterly rotation, same fairness as weekly chores.'+(state.alarms.seasonal?' Reminder ON.':' Reminder OFF in More → Alarms.')});
+ const nextSeasonal=state.instances.find(i=>i.seasonal&&i.status!=='done'); if(nextSeasonal) suggestions.push({icon:'🍂',title:'Seasonal: '+chore(nextSeasonal.choreId).name+' • '+fmtDate(nextSeasonal.date),body:nextSeasonal.assignee.map(id=>room(id).name).join(' & ')+' is on it • '+chore(nextSeasonal.choreId).diff+' suck-points • Quarterly rotation, same fairness as weekly chores.'+(state.alarms.seasonal?' Reminder ON.':' Reminder OFF in More → Alarms.')});
  if(!suggestions.length) suggestions.push({icon:'✨',title:'House is balanced',body:'No guest or bathroom flags right now. Nice and quiet.'});
  el.innerHTML=suggestions.map(s=>`<div class="suggest"><b style="font-size:13px">${s.icon} ${s.title}</b><p class="small" style="margin:4px 0 0">${s.body}</p></div>`).join('');
 }
 
 function taskRow(ins,compact){
- const ch=chore(ins.choreId);const as=room(ins.assignee);const isMine=ins.assignee===state.currentUser;
+ const ch=chore(ins.choreId);const isMine=ins.assignee.includes(state.currentUser);
+ const asNames=ins.assignee.map(id=>room(id).name).join(' & ');
+ const asAvatars=ins.assignee.map(id=>{let r=room(id);return `<span class="av" style="background:${r.color};margin-left:-6px;border:2px solid var(--card)">${r.name[0]}</span>`}).join('');
  const openB=state.bounties.find(b=>b.instanceId===ins.id&&b.status==='open');
  let pill=ins.status==='done'?'<span class="pill green">Done</span>':ins.claimedBy?'<span class="pill teal">In progress</span>':'<span class="pill">Pending</span>';
  if(ch.seasonal) pill+=' <span class="pill amber">🍂 Seasonal</span>';
@@ -597,8 +599,8 @@ function taskRow(ins,compact){
   if(!ins.claimedBy)actions=`<button class="btn primary" onclick="startTask('${ins.id}')">▶ Start</button><button class="btn ghost" onclick="imOut('${ins.id}')">I'm out</button>`;
   else if(ins.claimedBy===state.currentUser)actions=`<button class="btn primary" onclick="finishTask('${ins.id}')">✓ Done</button><span class="small">Live now • ${elapsedMins(ins.id)} min</span>`;
   else actions=`<span class="pill teal"><span class="liveDot" style="width:7px;height:7px"></span> ${room(ins.claimedBy).name} is doing it</span>`;
- } else {actions=`<span class="small">Done by ${room(ins.doneBy)?.name||as.name} • ${ins.mins||'—'} min • locked</span>`}
- return `<div class="task"><div class="taskIcon" style="background:${ch.bg}">${ch.icon}</div><div class="taskMain"><div class="taskTitle">${ch.name} ${pill}</div><div class="meta">${fmtDate(ins.date)} • ${as.name}'s turn ${isMine?'• <b style="color:var(--accent)">You</b>':''} • ${ch.diff} pts${ch.seasonal?' • '+(ins.quarter||'Quarterly'):''}</div><div class="actions">${actions}</div></div><span class="av" style="background:${as.color}">${as.name[0]}</span></div>`;
+ } else {actions=`<span class="small">Done by ${room(ins.doneBy)?.name||'Unknown'} • ${ins.mins||'—'} min • locked</span>`}
+ return `<div class="task"><div class="taskIcon" style="background:${ch.bg}">${ch.icon}</div><div class="taskMain"><div class="taskTitle">${ch.name} ${pill}</div><div class="meta">${fmtDate(ins.date)} • ${asNames}'s turn ${isMine?'• <b style="color:var(--accent)">You</b>':''} • ${ch.diff} pts${ch.seasonal?' • '+(ins.quarter||'Quarterly'):''}</div><div class="actions">${actions}</div></div><div style="display:flex;padding-left:6px">${asAvatars}</div></div>`;
 }
 function renderTasks(){
  const regular = state.instances.filter(i=>!i.seasonal);
@@ -636,7 +638,7 @@ function renderHomeLiveOnly(){
 function startTask(id){
  const ins=state.instances.find(i=>i.id===id);
  if(ins.claimedBy&&ins.claimedBy!==state.currentUser){toast('Already started by '+room(ins.claimedBy).name+' • locked to one person');return}
- ins.claimedBy=state.currentUser;ins.assignee=state.currentUser;state.timerStart[id]=Date.now();state.timers[id]=1;
+ ins.claimedBy=state.currentUser;state.timerStart[id]=Date.now();state.timers[id]=1;
  renderAll();
  toast(state.alarms.started?room(state.currentUser).name+' started '+chore(ins.choreId).name+' • Live for everyone':'Started • Live view updated');
  showPage('live');
@@ -655,7 +657,7 @@ function renderBounty(){
  if(!state.bounties.length){el.innerHTML='<p class="small">No open covers.</p>';return}
  el.innerHTML=state.bounties.map(b=>{const ins=state.instances.find(i=>i.id===b.instanceId);if(!ins)return'';const ch=chore(ins.choreId);return `<div class="task"><div class="taskIcon" style="background:${ch.bg}">${ch.icon}</div><div class="taskMain"><div class="taskTitle">${ch.name} <span class="pill amber">${room(b.from).name} is out</span></div><div class="meta">${fmtDate(ins.date)} • ${ch.diff} pts • ${b.mode==='cash'?'$'+b.price+' cash':'Swap • they owe you next week'}</div><div class="actions">${b.status==='open'?(b.from===state.currentUser?'<span class="pill">Waiting…</span>':`<button class="btn primary" onclick="claimBounty('${b.id}')">Take it • ${room(state.currentUser).name}</button>`):`<button class="btn ghost" onclick="confirmBounty('${b.id}')">Confirm done</button>`}</div></div></div>`}).join('');
 }
-function claimBounty(bid){const b=state.bounties.find(x=>x.id===bid);if(b.from===state.currentUser){toast('You cannot take your own cover');return}const ins=state.instances.find(i=>i.id===b.instanceId);ins.assignee=state.currentUser;ins.claimedBy=state.currentUser;state.timerStart[ins.id]=Date.now();b.status='claimed';b.claimer=state.currentUser;if(b.mode==='swap')state.covers.unshift({from:b.from,to:state.currentUser,points:chore(ins.choreId).diff,chore:chore(ins.choreId).name,price:chore(ins.choreId).price});renderAll();toast('You took it • Live now');showPage('live')}
+function claimBounty(bid){const b=state.bounties.find(x=>x.id===bid);if(b.from===state.currentUser){toast('You cannot take your own cover');return}const ins=state.instances.find(i=>i.id===b.instanceId);let idx=ins.assignee.indexOf(b.from);if(idx>-1)ins.assignee[idx]=state.currentUser;else ins.assignee.push(state.currentUser);state.timerStart[ins.id]=Date.now();b.status='claimed';b.claimer=state.currentUser;if(b.mode==='swap')state.covers.unshift({from:b.from,to:state.currentUser,points:chore(ins.choreId).diff,chore:chore(ins.choreId).name,price:chore(ins.choreId).price});renderAll();toast('You took it • Live now');showPage('live')}
 function confirmBounty(bid){const b=state.bounties.find(x=>x.id===bid);b.status='confirmed';const ins=state.instances.find(i=>i.id===b.instanceId);ins.status='done';ins.doneBy=b.claimer;ins.mins=18;ins.claimedBy=null;renderAll();toast('Confirmed ✓ Cover settled')}
 
 function renderMonth(){
@@ -663,10 +665,10 @@ function renderMonth(){
  const regular = state.instances.filter(i=>!i.seasonal);
  const seasonal = state.instances.filter(i=>i.seasonal);
  let weeks={};regular.forEach(ins=>{let k=ins.date<new Date('2026-10-09')?'Week of Oct 2':'Week of Oct 9';(weeks[k]=weeks[k]||[]).push(ins)});
- let html=Object.entries(weeks).map(([k,list])=>`<div style="margin-top:10px"><b style="font-size:13px">${k}</b>${list.slice(0,6).map(ins=>{const ch=chore(ins.choreId);const live=ins.claimedBy&&ins.status!=='done';return `<div class="logItem"><span>${ch.icon} ${ch.name}</span><span>${live?room(ins.claimedBy).name+' • live':room(ins.assignee).name+' • '+ins.status}</span></div>`}).join('')}</div>`).join('');
+ let html=Object.entries(weeks).map(([k,list])=>`<div style="margin-top:10px"><b style="font-size:13px">${k}</b>${list.slice(0,6).map(ins=>{const ch=chore(ins.choreId);const live=ins.claimedBy&&ins.status!=='done';return `<div class="logItem"><span>${ch.icon} ${ch.name}</span><span>${live?room(ins.claimedBy).name+' • live':ins.assignee.map(id=>room(id).name).join(' & ')+' • '+ins.status}</span></div>`}).join('')}</div>`).join('');
  if(seasonal.length){
    let byQ={}; seasonal.forEach(ins=>{ const k=ins.quarter||'Seasonal'; (byQ[k]=byQ[k]||[]).push(ins) });
-   html+=`<div style="margin-top:14px;padding-top:10px;border-top:1px dashed var(--line)"><b style="font-size:13px">🍂 Seasonal deep cleans</b><p class="small" style="margin:4px 0 6px">Quarterly jobs counted in the same fair points as weekly chores.</p>${Object.entries(byQ).map(([q,list])=>`<div style="margin-top:8px"><span class="pill amber">${q}</span>${list.map(ins=>{const ch=chore(ins.choreId);const live=ins.claimedBy&&ins.status!=='done';return `<div class="logItem"><span>${ch.icon} ${ch.name} <span class="small">• ${ch.diff} pts</span></span><span>${live?room(ins.claimedBy).name+' • live':room(ins.assignee).name+' • '+ins.status+' • '+fmtDate(ins.date)}</span></div>`}).join('')}</div>`).join('')}</div>`;
+   html+=`<div style="margin-top:14px;padding-top:10px;border-top:1px dashed var(--line)"><b style="font-size:13px">🍂 Seasonal deep cleans</b><p class="small" style="margin:4px 0 6px">Quarterly jobs counted in the same fair points as weekly chores.</p>${Object.entries(byQ).map(([q,list])=>`<div style="margin-top:8px"><span class="pill amber">${q}</span>${list.map(ins=>{const ch=chore(ins.choreId);const live=ins.claimedBy&&ins.status!=='done';return `<div class="logItem"><span>${ch.icon} ${ch.name} <span class="small">• ${ch.diff} pts</span></span><span>${live?room(ins.claimedBy).name+' • live':ins.assignee.map(id=>room(id).name).join(' & ')+' • '+ins.status+' • '+fmtDate(ins.date)}</span></div>`}).join('')}</div>`).join('')}</div>`;
  }
  el.innerHTML=html;
  $('ledger').innerHTML=state.covers.length?state.covers.map(c=>`<div class="logItem"><span>${room(c.from).name} owes ${room(c.to).name} • ${c.chore}</span><b>${c.points} pts</b></div>`).join(''):'<p class="small">No swap debts.</p>';
@@ -754,12 +756,12 @@ function renderExtras(){
 }
 
 function runAudit(){
- const doneOnes=state.instances.filter(i=>i.status==='done');const pick=doneOnes[Math.floor(Math.random()*doneOnes.length)]||state.instances[0];const auditor=state.roommates.find(r=>r.id!==pick.assignee)||state.roommates[0];state.audit={instanceId:pick.id,auditor:auditor.id,result:null};renderAudit();toast(state.alarms.audits?'Audit for '+room(auditor).name:'Audit picked (shown here, alarm off)');
+ const doneOnes=state.instances.filter(i=>i.status==='done');const pick=doneOnes[Math.floor(Math.random()*doneOnes.length)]||state.instances[0];const auditor=state.roommates.find(r=>!pick.assignee.includes(r.id))||state.roommates[0];state.audit={instanceId:pick.id,auditor:auditor.id,result:null};renderAudit();toast(state.alarms.audits?'Audit for '+room(auditor).name:'Audit picked (shown here, alarm off)');
 }
 function renderAudit(){
  const el=$('auditBox');if(!el)return;if(!state.audit){el.innerHTML='<p class="small">No audit yet this week.</p>';return}
  const ins=state.instances.find(i=>i.id===state.audit.instanceId);const ch=chore(ins.choreId);
- el.innerHTML=`<div class="task" style="border:none;padding:0"><div class="taskIcon" style="background:${ch.bg}">${ch.icon}</div><div class="taskMain"><div class="taskTitle">${ch.name}</div><div class="meta">${fmtDate(ins.date)} • by ${room(ins.doneBy||ins.assignee).name} • Checker: <b>${room(state.audit.auditor).name}</b></div><div class="actions">${state.audit.result?`<span class="pill ${state.audit.result==='pass'?'green':'red'}">${state.audit.result}</span>`:`<button class="btn primary" onclick="auditResult('pass')">Looks good ✓</button><button class="btn ghost" onclick="auditResult('fail')">Redo</button>`}</div></div></div>`;
+ el.innerHTML=`<div class="task" style="border:none;padding:0"><div class="taskIcon" style="background:${ch.bg}">${ch.icon}</div><div class="taskMain"><div class="taskTitle">${ch.name}</div><div class="meta">${fmtDate(ins.date)} • by ${room(ins.doneBy||ins.assignee[0]).name} • Checker: <b>${room(state.audit.auditor).name}</b></div><div class="actions">${state.audit.result?`<span class="pill ${state.audit.result==='pass'?'green':'red'}">${state.audit.result}</span>`:`<button class="btn primary" onclick="auditResult('pass')">Looks good ✓</button><button class="btn ghost" onclick="auditResult('fail')">Redo</button>`}</div></div></div>`;
 }
 function auditResult(r){state.audit.result=r;renderAudit();toast(r==='pass'?'Audit passed ✓':'Needs redo')}
 
@@ -777,7 +779,7 @@ const DAY_MAP={sunday:0,sun:0,monday:1,mon:1,tuesday:2,tue:2,tues:2,wednesday:3,
 const CHORE_CATALOG=[
  {key:'trash',match:/\btrash|garbage|rubbish\b/i,name:'Take out trash',icon:'🗑️',bg:'#FEF3C7',diff:1,defCount:2,defPeriod:'week',price:1},
  {key:'bathroom',match:/\bbathroom|toilet|shower\b/i,name:'Bathroom scrub',icon:'🚿',bg:'#FCE7F3',diff:3,defCount:2,defPeriod:'month',price:3},
- {key:'kitchen',match:/\bkitchen\b/i,name:'Kitchen clean',icon:'🍳',bg:'#CCFBF1',diff:3,defCount:1,defPeriod:'week',price:2},
+ {key:'kitchen',match:/\bkitchen\b/i,name:'Kitchen clean',icon:'🍳',bg:'#CCFBF1',diff:3,defCount:1,defPeriod:'week',price:2,teamSize:2},
  {key:'mop',match:/\b(sweep|mop|broom|vacuum|hoover)\b/i,name:'Sweep & mop',icon:'🧹',bg:'#DBEAFE',diff:3,defCount:2,defPeriod:'month',price:2},
  {key:'stairs',match:/\bstairs|hallway|landing\b/i,name:'Stairs & hallway',icon:'🪜',bg:'#EDE9FE',diff:2,defCount:1,defPeriod:'week',price:1.5},
  {key:'living',match:/\bliving room|lounge|sitting room\b/i,name:'Living room tidy',icon:'🛋️',bg:'#DCFCE7',diff:2,defCount:1,defPeriod:'week',price:1.5},
@@ -883,13 +885,13 @@ function parseSmartSetup(){
        if(/twice a week/.test(lower)) count=2;
      }
      if(cat.key==='trash'){ count=Math.max(1,trashDays.length); period='week'; }
-     found.set(cat.key,{...cat,count,period});
+     found.set(cat.key,{...cat,count,period,teamSize:cat.teamSize||1});
    }
  });
  if(!found.has('trash')) found.set('trash',{...CHORE_CATALOG[0],count:trashDays.length,period:'week'});
  if(found.size<3 && !found.has('kitchen')) found.set('kitchen',{...CHORE_CATALOG[2]});
  if(found.size<3 && !found.has('bathroom')) found.set('bathroom',{...CHORE_CATALOG[1]});
- const chores=[...found.values()].map((c,i)=>({id:'c'+(i+1),name:c.name,icon:c.icon,bg:c.bg,diff:c.diff,count:c.count,period:c.period,price:c.price}));
+ const chores=[...found.values()].map((c,i)=>({id:'c'+(i+1),name:c.name,icon:c.icon,bg:c.bg,diff:c.diff,count:c.count,period:c.period,price:c.price,teamSize:c.teamSize||1}));
  const roommateNames = names.length>=2 ? names : ['Alex','Maya','Jon','Priya'];
  const draftRoommates=roommateNames.map((n,i)=>({id:'r'+(i+1),name:n,color:COLORS[i%COLORS.length],streak:0}));
  state.setupDraft={text,roommates:draftRoommates,chores,trashDays};
@@ -930,7 +932,7 @@ function applySmartSetup(){
  const d=state.setupDraft; if(!d) return;
  const seasonals=state.chores.filter(c=>c.seasonal);
  state.roommates=d.roommates.map((r,i)=>({id:'r'+(i+1),name:r.name||('Roommate '+(i+1)),color:COLORS[i%COLORS.length],streak:0}));
- const newChores=d.chores.map((c,i)=>({id:'c'+(i+1),name:c.name,icon:c.icon,bg:c.bg,diff:c.diff,count:c.count,period:c.period,price:c.price|| (c.diff<=1?1:c.diff<=3?2:3)}));
+ const newChores=d.chores.map((c,i)=>({id:'c'+(i+1),name:c.name,icon:c.icon,bg:c.bg,diff:c.diff,count:c.count,period:c.period,price:c.price|| (c.diff<=1?1:c.diff<=3?2:3),teamSize:c.teamSize||1}));
  state.chores=[...newChores,...seasonals];
  state.trashDays=[...d.trashDays];
  state.currentUser=state.roommates[0].id;
@@ -957,5 +959,3 @@ setTimeout(()=>{ if(!state.setupSeen) openSmartSetup(); },650);
 </script>
 </body>
 </html>
-
-```
